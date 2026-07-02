@@ -5,4 +5,9 @@ Team member 1 - Sameer Choudhary
 Team member 2 - Anant sharma 
 
 
-Tech Stack
+Tech Stack:-
+Next.js :- Full-Stack React framework
+PostgreSQL :- Relational database
+Prisma :- ORM for TypeScript
+GCP :- Cloud platform and hosting
+Github Actions:- CI/CD automation
