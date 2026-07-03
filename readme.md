@@ -252,4 +252,274 @@ npm run prisma:seed
 npm run dev
 
 
+Application Flow
+Digital khatabook/ledger app for shopkeepers — every user-facing flow across the MVP and extended modules, mapped to screens, API routes, and the locked architectural decisions from the feature spec.
+0. Screen / Route Map
+High-level information architecture, matching the locked folder structure.
+●	(auth) — /login, /register
+●	(dashboard)/dashboard — main landing page, financial summary
+●	(dashboard)/contacts, /contacts/[id] — contact list & individual ledger
+●	(dashboard)/workers, /workers/[id] — worker & salary management
+●	(dashboard)/inventory, /inventory/[productId] — products, stock, loss
+●	(dashboard)/settings — shop settings, roles, language
+●	Public share route — read-only per-contact ledger link
+●	api/auth, api/contacts, api/transactions, api/workers, api/inventory, api/notifications, api/paper-import, api/sse, api/cron — one folder per resource
+0b. File & Runtime Architecture Diagram
+How the folder structure maps to the request lifecycle — browser, through the thin app/ routes, into fat server/ services, down to Prisma/Postgres, and out to external services.
+
+1. Core Flows
+4.1 Authentication & Session Flow
+Screens/Routes: (auth)/login, (auth)/register  ·  API: /api/auth/*
+Who can do this: Everyone (unauthenticated entry point)
+Entry points
+●	User opens the app for the first time or after logout
+●	Session cookie expired / invalid
+Flow
+1.Unauthenticated request to any (dashboard) route is intercepted by require-session.ts middleware and redirected to /login.
+2.User registers (email/password, or provider if configured) via NextAuth — a User row is created.
+3.First-time user with no ShopMember row is routed into Shop Onboarding (4.2) instead of the dashboard.
+4.Returning user with one or more ShopMember rows lands on the dashboard for their last-used (or only) shop.
+5.Session persists via NextAuth session/JWT; every subsequent server action reads the session to resolve userId + activeShopId.
+6.Logout clears the session and returns the user to /login; any open SSE connection and heartbeat/lock timers are closed client-side.
+Key decision points / branches
+●	0 shops → force onboarding. 1 shop → auto-select. 2+ shops → last-used shop from a stored preference, switchable via the shop switcher (4.9).
+Edge cases handled
+●	Session expires mid-edit: the version-check safety net (4.5) still protects the write; user is bounced to /login on next request and any held lock is released after TTL.
+4.2 Shop Onboarding Flow
+Screens/Routes: (dashboard)/settings (first-run variant)  ·  API: POST /api/shops
+Who can do this: Any newly registered user
+Entry points
+●	Immediately after first registration with zero shops
+Flow
+1.User is prompted for shop name and preferred language (Hindi/English, feeds i18n, 4.15).
+2.Shop row is created; a ShopMember row links the user as Owner.
+3.Default per-shop settings are seeded: halfDayFraction = 0.5, expiryAlertDays = 3.
+4.User is dropped into the dashboard (4.3), which is empty-state (no contacts/transactions yet) and surfaces two calls to action: 'Add your first contact' and 'Import from paper khata / CSV'.
+4.3 Dashboard Flow
+Screens/Routes: (dashboard)/dashboard
+Who can do this: Owner & Staff (Staff view may hide financial totals per permission settings)
+Entry points
+●	Default landing page after login/shop switch
+Flow
+1.Server component reads activeShopId and queries EarningsRollup for today + this month (1.9) — no on-read aggregation.
+2.Dashboard renders four headline cards: Total Dues (sum of positive Contact balances), Total Payable (sum of negative balances), Salary Payable (from pending Worker calculations), and Loss (from the same rollup table, 3.2).
+3.A live-updating 'Today's Earnings' figure subscribes to the same SSE channel used for balances (4.6) — no page refresh needed as new transactions land.
+4.Recent activity strip shows the last few transactions/audits across all contacts, each linking into that contact's ledger.
+5.Quick-action buttons: Add Transaction, Add Contact, Import.
+Edge cases handled
+●	Multiple shopkeepers viewing the dashboard simultaneously all receive the same SSE-pushed rollup updates.
+2. Contact & Transaction Flows
+4.4 Contact Management Flow (Add / Edit / List)
+Screens/Routes: (dashboard)/contacts, (dashboard)/contacts/[id]  ·  API: /api/contacts/*
+Who can do this: Owner & Staff can add/view; edit/delete permission depends on role settings
+Entry points
+●	Contacts list page
+●	Quick-add from dashboard
+●	Auto-create from bulk import or paper migration (4.11/4.12)
+Flow
+1.User opens Contacts list — cursor-paginated (4.7), searchable/filterable (4.8).
+2.Add Contact: name (required), phone/email (at least one recommended, required for CSV dedupe later), opening balance, opening balance direction, optional openingBalanceAsOf date.
+3.New Contact row created with balance = opening balance; direction (due/payable) is derived from the sign, never stored separately.
+4.Selecting a contact opens their ledger: running balance, transaction history (4.7), attachments, due-date reminders, and a 'Share / Export PDF' action (4.10).
+5.Edit Contact updates name/phone/email; balance itself is only ever changed via a Transaction, never edited directly, to preserve the audit trail.
+Key decision points / branches
+●	Balance sign convention: positive = they owe the shop (due); negative = shop owes them (payable). One entity serves both customers and vendors.
+4.5 Add Transaction Flow
+Screens/Routes: (dashboard)/contacts/[id] → Add Transaction modal  ·  API: POST /api/transactions
+Who can do this: Owner & Staff
+Entry points
+●	'Add Transaction' button on a contact's ledger page
+●	Dashboard quick action (contact picker first)
+Flow
+1.	User picks type: YOU_GAVE (increases what they owe) or YOU_GOT (decreases it), enters amount, optional note, optional due date, optional receipt/photo attachment (4.9).
+2.	On submit, server opens a DB transaction and row-locks the Contact with SELECT ... FOR UPDATE (1.7) to prevent lost updates from concurrent new transactions.
+3.	New Transaction row is inserted with a computed balanceAfter snapshot cached on the row (1.8) so history never needs to recompute totals.
+4.	Contact.balance is updated inside the same DB transaction; EarningsRollup for today is incremented/decremented in the same transaction (1.9).
+5.	Postgres NOTIFY fires on commit; pg-listener.ts picks it up and pushes the new balance down every open SSE connection for that contact/shop (4.6).
+6.	If a due date was set, this feeds the Dues & Reminders flow (4.8b).
+Edge cases handled
+●	Two Staff adding transactions for the same contact at the same moment: row lock serializes the writes, so both succeed with correct sequential balanceAfter values — this is a different mechanism from the edit-lock in 4.6.
+4.6 Edit / Delete Transaction Flow (Locking, Versioning, Audit Trail, Real-Time)
+Screens/Routes: (dashboard)/contacts/[id] → transaction row → Edit  ·  API: PATCH/DELETE /api/transactions/[id]  ·  SSE: /api/sse
+Who can do this: Owner always; Staff per role permission
+Entry points
+●	Edit or Delete icon on any transaction row in the history list
+Flow
+1.	User clicks Edit — client requests a soft-lock: server checks Transaction.lockedBy/lockedAt; if free (or TTL expired), sets lockedBy = current user, lockedAt = now, and broadcasts 'locked' over SSE so every other open tab on this contact instantly shows 'being edited by <name>' and disables its own Edit button.
+2.	While the edit form is open, a client heartbeat (~30s) refreshes lockedAt to keep the ~2 minute TTL alive.
+3.	On Save: server re-checks the lock is still held by this user AND checks the optimistic version field hasn't changed since the form loaded (1.1) — the safety net beneath the lock.
+4.	If both checks pass: update wrapped in a DB transaction with the same Contact row-lock pattern as 4.5 (recomputing balanceAfter for this and any later rows if the amount changed), version incremented, and a TransactionAudit row written (who, when, before/after values).
+5.	Lock is released (lockedBy/lockedAt cleared) and an SSE event broadcasts the updated balance to all open tabs.
+6.	Delete follows the same lock + version-check path but performs a soft delete (isDeleted, deletedAt, deletedBy) rather than a hard delete (1.5), also reversing the balance/rollup effect and writing an audit row.
+7.	Closing the edit form, navigating away, or a network drop releases the lock immediately client-side and via TTL expiry server-side as a fallback.
+Key decision points / branches
+●	Lock conflict: form opens read-only with a 'currently being edited by X, released in ~Y' notice instead of blocking navigation entirely.
+●	Version conflict (stale lock expired, someone else already saved): save is rejected, user sees the 'changed while you were away' prompt — the same UI pattern reused for offline sync conflicts (4.16).
+Edge cases handled
+●	Crashed tab / uncleanly closed browser: TTL expiry auto-releases the lock within ~2 minutes so the transaction isn't stuck locked forever.
+●	Editing an amount on an older transaction requires re-deriving balanceAfter for every later transaction on that contact — handled inside the same locked DB transaction to avoid a torn read.
+4.7 Real-Time Balance Sync & Paginated History Flow
+Screens/Routes: components/features/transactions/balance-live.tsx  ·  API: /api/sse
+Who can do this: Any user viewing a contact/dashboard currently open elsewhere too
+Entry points
+●	Any page rendering a live balance or lock indicator
+Flow
+1.	On mount, the client opens one SSE connection to /api/sse scoped to the active shop (and optionally the open contact).
+2.	Server-side pg-listener.ts holds a Postgres LISTEN on the relevant channel(s); when any write NOTIFYs, it forwards the payload (balance changed / lock acquired / lock released / rollup changed) to every matching open SSE connection.
+3.	Client updates the on-screen balance, dashboard totals, or lock badge without a page reload or manual refresh.
+4.	Transaction history itself loads via cursor-based pagination on (createdAt, id) (1.8) — 'Load more' fetches the next page using the last row's cursor, not an offset, so it stays fast however deep the history goes.
+5.	Each history row reads its balanceAfter directly from the cached column rather than summing prior rows.
+4.8 Search & Filter Flow
+Screens/Routes: (dashboard)/contacts, contact ledger view
+Who can do this: Owner & Staff
+Entry points
+●	Search bar on Contacts list
+●	Filter panel on a contact's transaction history
+Flow
+1.Contacts list: search by name/phone/email (debounced), filter by due vs payable vs settled.
+2.Transaction history: filter by type (YOU_GAVE/YOU_GOT), date range, and by has-attachment/has-due-date, layered on top of the cursor pagination.
+3. Communication & Supporting Flows
+4.8b Due Dates & Reminders / Notifications Flow
+Screens/Routes: server/jobs, API: /api/cron/*  ·  (dashboard)/notifications (in-app log)
+Who can do this: Owner receives approval/summary pushes; Staff/Owner both get due-date reminders they're associated with
+Entry points
+●	A transaction is saved with a due date
+●	Daily cron sweep
+Flow
+1.A daily cron hit (cron-job.org → shared-secret-protected route, later Cloud Scheduler) scans for transactions whose due date is approaching/overdue.
+2.For each match, a Notification row is created (channel field set, currently 'push') and sent via FCM Web Push to every ShopMember of that shop.
+3.In-app notification log always receives the record too, so nothing is lost if push permission was denied or the PWA was closed.
+4.Tapping a push notification deep-links into the relevant contact's ledger.
+4.9 Receipt / Photo Attachment Flow
+Screens/Routes: Add/Edit Transaction modal
+Who can do this: Owner & Staff
+Entry points
+●	Attach button inside Add/Edit Transaction
+Flow
+1.User selects/photographs an image; it uploads to GCS and the returned URL is stored on the Transaction row.
+2.Attachment renders as a thumbnail in the transaction history row and full-size on click.
+3.The same attachment pattern is reused for the paper-khata original page image (4.12).
+4.9b Multi-Shop Switching Flow
+Screens/Routes: components/layout — shop switcher
+Who can do this: Any user belonging to 2+ shops via ShopMember
+Entry points
+●	Shop switcher in the top nav
+Flow
+1.Dropdown lists every Shop the user has a ShopMember row for, with their role (Owner/Staff) shown per shop.
+2.Selecting a shop updates activeShopId (stored client-side and as the last-used preference), and every subsequent read/write, SSE subscription, and dashboard query is scoped to it.
+3.Switching shops closes the old SSE connection and opens a new one scoped to the newly active shop.
+4.10 Trash / Restore Flow
+Screens/Routes: (dashboard)/contacts/[id]/trash or a shop-wide Trash view
+Who can do this: Owner (Staff typically restricted, per role permission settings)
+Entry points
+●	Trash icon on a contact ledger or a dedicated Trash section
+Flow
+1.Lists all soft-deleted Transactions (isDeleted = true) for the shop/contact with who-deleted-when.
+2.Restore re-flips isDeleted, re-applies the balance/rollup effect inside a locked DB transaction (same pattern as 4.5), and writes a new audit row for the restoration.
+3.Permanent purge (if offered) is a separate, harder-confirmed action — soft delete alone satisfies the audit-trail requirement, so purge is optional/admin-only.
+4.11 Shareable Ledger Link & PDF Export Flow
+Screens/Routes: (dashboard)/contacts/[id] → Share/Export  ·  public read-only share route
+Who can do this: Owner & Staff can generate; the shared link itself is public/read-only
+Entry points
+●	Share button on a contact ledger
+●	Export button on the dashboard (all-dues summary)
+Flow
+1.Per-contact: 'Share Link' generates a signed, read-only URL showing that contact's live balance and history (no edit affordances) — useful for the shopkeeper to send the customer their own khata.
+2.Per-contact: 'Export PDF' server-renders the same data via @react-pdf/renderer into a full ledger report (shop header, contact, running-balance table).
+3.Dashboard: 'Export All Dues' server-renders a second report type listing every contact with an outstanding due/payable, sorted by amount.
+4.Both PDF types reuse the same renderer/data-shaping logic so the shareable link and the PDF are always visually consistent.
+4.Data-In Flows (Import & Migration)
+4.12 Opening Balance & Bulk CSV Import Flow
+Screens/Routes: (dashboard)/contacts → Import  ·  API: /api/contacts/import
+Who can do this: Owner & Staff
+Entry points
+●	Import button on Contacts list
+●	Confirm step of the AI paper-migration flow (4.13) feeds into this same pipeline
+Flow
+1.User uploads a CSV with columns name, phone, email, opening_balance, type (optional).
+2.Server validates each row: name is a display label only (not unique); at least one of phone/email is required and used as the dedupe key.
+3.A row whose phone/email matches an existing Contact updates that contact; otherwise a new Contact is created with balance = opening_balance.
+4.opening_balance must be numeric; invalid rows are reported back to the user without failing the whole batch.
+5.Import summary screen shows created vs updated vs failed counts.
+4.13 AI-Assisted Paper Khata Migration Flow
+Screens/Routes: (dashboard)/contacts → Import from Paper  ·  API: /api/paper-import/*
+Who can do this: Owner & Staff
+Entry points
+●	'Import from Paper Khata' entry point alongside CSV import
+Flow
+1.User picks a single asOfDate for the whole batch, then uploads photos of paper ledger pages — creates one PaperImportBatch (status PENDING).
+2.Each photo becomes a PaperImportPage (status PENDING) and uploads to GCS.
+3.Batch moves to PROCESSING; each page is sent asynchronously — one Gemini API vision call per image — extracting name + final balance (MVP scope) into rawExtractedJson with a per-field confidenceScore. Page status becomes EXTRACTED (or FAILED).
+4.A progress screen polls/subscribes to batch status; once all pages finish, an FCM push notification tells the shopkeeper review is ready and batch status becomes READY_FOR_REVIEW.
+5.Shopkeeper opens the editable review table: every extracted row is editable inline, low-confidence fields are visually flagged, and rows with no phone/email are marked 'will create as new contact' for manual dedupe.
+6.Reviewed data can be exported as CSV at this point regardless of whether it's ever committed.
+7.On Confirm, reviewed rows are handed to the existing Bulk CSV Import pipeline (4.12) — same validation and dedupe logic, no parallel path. Contact.openingBalanceAsOf is set to the batch's asOfDate so the earnings rollup doesn't miscount migrated money as today's activity.
+8.Each committed row's PaperImportPage.resultingContactId is set, reviewedBy/reviewedAt recorded, and the original page image stays attached to the resulting Contact (same attachment pattern as 4.9). Batch status becomes COMMITTED.
+Key decision points / branches
+●	Nothing ever writes to the live database before human review and explicit confirm.
+●	MVP extracts only name + final balance; dated line-item extraction (backdated Transaction rows) is deferred pending an accuracy spike on real mixed Hindi/English samples.
+Edge cases handled
+●	A page that fails extraction (FAILED) is flagged for retry or manual entry without blocking the rest of the batch.
+●	Batch can be CANCELLED before commit with no residual data written.
+5. Extended Module Flows
+4.14 Worker & Salary Management Flow
+Screens/Routes: (dashboard)/workers, (dashboard)/workers/[id]  ·  API: /api/workers/*
+Who can do this: Owner manages workers & approves pay; Staff may mark attendance depending on role settings
+Entry points
+●	Workers section in the dashboard nav
+Flow
+1.Add Worker: name, pay type (monthly or daily-wage), rate.
+2.Daily attendance marking: present / absent / half-day / leave per worker per day. Half-day pay uses Shop.halfDayFraction (default 50%) applied to the daily rate.
+3.Pending salary is calculated per pay type (monthly pro-rated by attendance, or daily-wage summed from present/half-day days) and surfaces as 'Salary Payable' on the dashboard (4.3).
+4.Recording a SalaryPayment follows the same lock + optimistic-version + audit pattern as Transactions (SalaryAudit row written), and reduces the pending salary figure.
+4.15 Inventory & Loss Tracking Flow (with Stock Approval Workflow)
+Screens/Routes: (dashboard)/inventory, (dashboard)/inventory/[productId]  ·  API: /api/inventory/*
+Who can do this: Owner & Staff can create entries; only Owner approves ADJUSTMENT/LOSS entries
+Entry points
+●	Inventory section in the dashboard nav
+Flow
+1.Add Product, optionally with ProductBatch rows carrying per-batch expiry dates.
+2.StockEntry types: PURCHASE and SALE auto-approve immediately and update Product.currentStock right away.
+3.ADJUSTMENT and LOSS entries are created with status PENDING and do NOT touch currentStock yet; an FCM push notifies the Owner the moment Staff submits one.
+4.Owner reviews and Approves or Rejects with an optional reviewNote; only on APPROVED does currentStock actually change, and the decision is written through the same audit-trail pattern used everywhere else.
+5.A daily cron sweep (same mechanism as due-date reminders, 4.8b) checks ProductBatch expiry against Shop.expiryAlertDays (default 3) and creates expiry-alert Notifications via FCM.
+6.Expired stock can generate a Loss record automatically, or a shopkeeper can log one manually; Loss rolls into the same EarningsRollup table (totalLoss) so it appears alongside earnings/dues on the dashboard 'Loss' section (daily & monthly).
+Key decision points / branches
+●	PURCHASE/SALE = routine, auto-approved. ADJUSTMENT/LOSS = can hide shrinkage or error, so they require Owner sign-off before affecting stock counts.
+6. Platform Flows
+4.16 PWA / Offline Flow & Conflict Resolution
+Screens/Routes: Service worker, offline write-queue (client)
+Who can do this: Owner & Staff
+Entry points
+●	Network drops while the app is open
+●	App is opened while offline (previously installed as a PWA)
+Flow
+1.Static shell and last-loaded ledger data are served from cache so the app remains usable offline.
+2.Writes made offline (new/edited transactions, attendance, stock entries) are queued locally instead of failing outright.
+3.On reconnect, each queued write is replayed through the normal API path, going through the exact same optimistic version check as any live write (4.6/4.5).
+4.If the version has moved on since the write was queued, the same 'changed while you were offline' conflict prompt used for live-lock conflicts is shown — no silent auto-merge.
+5.Successfully replayed writes clear from the queue and trigger the normal SSE broadcast to any other open sessions.
+4.17 Language (Hindi/English) & Settings Flow
+Screens/Routes: (dashboard)/settings
+Who can do this: Owner controls shop-wide defaults; each user can override their own display language
+Entry points
+●	Settings page
+●	Language toggle in the top nav
+Flow
+1 User toggles Hindi/English; i18n strings swap immediately client-side and the preference persists per user.
+2 Owner configures shop-level settings here too: halfDayFraction, expiryAlertDays, and role permissions for Staff (which of edit/delete/approve actions they're allowed).
+7. Role-Based Permissions — Cross-Cutting Summary
+Every flow above respects this shared Owner/Staff permission matrix (enforced via server/middleware/require-role.ts, not re-implemented per feature):
+Action	Owner	Staff
+Add transaction / contact	Yes	Yes
+Edit / delete transaction	Yes	Configurable (default: yes, own entries)
+Approve stock ADJUSTMENT / LOSS	Yes	No — submit only
+Approve/reject worker salary payment	Yes	No — record only
+Manage shop settings, roles	Yes	No
+Invite/remove ShopMembers	Yes	No
+View dashboard financial totals	Yes	Configurable
+Bulk import / paper migration	Yes	Yes
+Trash / restore	Yes	Configurable
+
+
 
