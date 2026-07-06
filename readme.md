@@ -112,7 +112,7 @@ Key engineering decisions that shape the system (full rationale in the [TRD](#pr
 | 🔄 **App Flow** | Screen-by-screen and API-by-API user flows | [App flow](https://docs.google.com/document/d/1BEJMq3-byJM5s_dYvxP2NArd1vLupGzA/edit?usp=sharing&ouid=114855801448713088340&rtpof=true&sd=true) |
 | 🗄️ **Backend Schema** | Database schema / Prisma model reference | [Backend Schema](https://docs.google.com/document/d/1jrDhQfxl0Otl9p3_j8FCBrcob_bJQJXa/edit?usp=sharing&ouid=114855801448713088340&rtpof=true&sd=true) |
 | 🚀 **Implementation Plan** | Build sequencing & milestones | [Implementation plan ](https://docs.google.com/document/d/1C-gMUKjzmnzLNZIEwO2C8hJCaj2_wdkA/edit?usp=sharing&ouid=114855801448713088340&rtpof=true&sd=true) |
-| **Folder structure** | About the folder structure in depth | [Folder structure](https://docs.google.com/document/d/1sP_flW9gPTNWFGm-VTAkGnV_saDPyt8w/edit?usp=sharing&ouid=114855801448713088340&rtpof=true&sd=true) |
+| **Folder structure** | About the folder structure in depth | [Folder structure]() |
 | **Features in depth** | Features explained in depth |  [Features](https://docs.google.com/document/d/1kOmHCT-sPaV1CoSjpUigtokMZtzpZq2u/edit?usp=sharing&ouid=114855801448713088340&rtpof=true&sd=true)|
 
 ---
