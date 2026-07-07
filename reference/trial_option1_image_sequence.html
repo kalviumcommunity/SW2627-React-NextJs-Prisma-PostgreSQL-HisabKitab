@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trial 1: In-Memory Image Sequence (Pre-extracted)</title>
+  <style>
+    :root {
+      --bg-dark: #0B0F19;
+      --text-color: #F3F4F6;
+      --accent: #10B981;
+      --gold: #D4AF37;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Lock scroll during extraction */
+    }
+    body.ready {
+      overflow-y: auto; /* Enable scroll when ready */
+    }
+    .scroll-container {
+      height: 400vh;
+      display: none;
+    }
+    body.ready .scroll-container {
+      display: block;
+    }
+    .viewport-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    canvas {
+      max-width: 80%;
+      max-height: 70%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      background-color: #000;
+    }
+    /* Loading overlay */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .loader-box {
+      text-align: center;
+      max-width: 400px;
+      padding: 30px;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.1s ease;
+    }
+    .overlay-info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 10;
+      max-width: 320px;
+      display: none;
+    }
+    body.ready .overlay-info {
+      display: block;
+    }
+    .hud {
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--gold);
+    }
+    .scroll-indicator {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      opacity: 0.6;
+      animation: pulse 2s infinite;
+      z-index: 10;
+      display: none;
+    }
+    body.ready .scroll-indicator {
+      display: block;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading / Extracting Screen -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader-box">
+      <h3 style="margin: 0 0 10px 0;">Extracting Video Frames...</h3>
+      <p style="font-size: 0.85rem; color: #9CA3AF; margin: 0;">
+        Option 1 pre-extracts frames into WebP images in-memory to guarantee smooth scroll playback.
+      </p>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="p-bar"></div>
+      </div>
+      <div style="margin-top: 10px; font-family: monospace; font-size: 0.9rem;" id="p-text">0%</div>
+    </div>
+  </div>
+
+  <div class="overlay-info">
+    <h3 style="margin-top:0;">Option 1: Image Sequence</h3>
+    <p style="font-size:0.85rem; color:#9CA3AF; margin-bottom:10px;">
+      Frames were extracted dynamically into memory. Scrolling runs at a butter-smooth 60fps.
+    </p>
+    <div class="hud">
+      <div>Scroll: <span id="val-scroll">0%</span></div>
+      <div>Frame: <span id="val-frame">0</span> / <span id="val-total-frames">0</span></div>
+      <div>Performance: <span style="color:#10B981;">Butter-Smooth</span></div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    Scroll Down to Animate ⬇️
+  </div>
+
+  <!-- Offscreen hidden video to perform extraction -->
+  <video id="hidden-extractor" src="./0707(1).mp4" muted playsinline style="display:none;"></video>
+
+  <div class="scroll-container">
+    <div class="viewport-container">
+      <canvas id="animation-canvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('hidden-extractor');
+    const canvas = document.getElementById('animation-canvas');
+    const ctx = canvas.getContext('2d');
+    const loader = document.getElementById('loader');
+    const pBar = document.getElementById('p-bar');
+    const pText = document.getElementById('p-text');
+    const valScroll = document.getElementById('val-scroll');
+    const valFrame = document.getElementById('val-frame');
+    const valTotalFrames = document.getElementById('val-total-frames');
+
+    const frames = [];
+    const fps = 15; // Extract 15 frames per second of video to optimize memory
+    let totalFramesExpected = 0;
+    let currentExtractTime = 0;
+
+    video.addEventListener('loadedmetadata', () => {
+      // Calculate how many frames to extract
+      totalFramesExpected = Math.floor(video.duration * fps);
+      valTotalFrames.textContent = totalFramesExpected;
+      
+      // Set canvas size based on video dimensions
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+
+      extractNextFrame();
+    });
+
+    function extractNextFrame() {
+      if (currentExtractTime >= video.duration) {
+        finishExtraction();
+        return;
+      }
+
+      video.currentTime = currentExtractTime;
+    }
+
+    video.addEventListener('seeked', onSeekedForExtraction);
+
+    function onSeekedForExtraction() {
+      // Draw current frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Save canvas content to a Blob/Object URL
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        frames.push(url);
+
+        // Update progress
+        const percent = Math.round((frames.length / totalFramesExpected) * 100);
+        pBar.style.width = percent + '%';
+        pText.textContent = `${percent}% (${frames.length}/${totalFramesExpected} frames)`;
+
+        // Advance time
+        currentExtractTime += 1 / fps;
+        extractNextFrame();
+      }, 'image/webp', 0.7); // Highly compressed webp
+    }
+
+    function finishExtraction() {
+      // Clean up event listener
+      video.removeEventListener('seeked', onSeekedForExtraction);
+      
+      // Hide loader and enable scrolling
+      loader.style.display = 'none';
+      document.body.classList.add('ready');
+      
+      // Draw first frame
+      drawFrame(0);
+
+      // Bind scroll
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = Math.max(0, Math.min(1, scrollTop / maxScroll));
+        
+        valScroll.textContent = Math.round(scrollPercent * 100) + '%';
+        
+        const frameIndex = Math.min(frames.length - 1, Math.floor(scrollPercent * frames.length));
+        valFrame.textContent = frameIndex;
+        drawFrame(frameIndex);
+      });
+    }
+
+    function drawFrame(index) {
+      if (!frames[index]) return;
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = frames[index];
+    }
+  </script>
+</body>
+</html>

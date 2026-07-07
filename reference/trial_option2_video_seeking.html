@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trial 2: Live Video Scroll-Seeking</title>
+  <style>
+    :root {
+      --bg-dark: #0B0F19;
+      --text-color: #F3F4F6;
+      --accent: #10B981;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .scroll-container {
+      height: 400vh; /* Creates scroll depth */
+      position: relative;
+    }
+    .viewport-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    video {
+      max-width: 80%;
+      max-height: 70%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      background-color: #000;
+    }
+    .overlay-info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 10;
+      max-width: 320px;
+    }
+    .hud {
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .scroll-indicator {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      opacity: 0.6;
+      animation: pulse 2s infinite;
+      z-index: 10;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay-info">
+    <h3 style="margin-top:0;">Option 2: Video Scroll-Seek</h3>
+    <p style="font-size:0.85rem; color:#9CA3AF; margin-bottom:10px;">
+      This trial directly seeks the video's <code>currentTime</code> based on your scroll position.
+    </p>
+    <div class="hud">
+      <div>Scroll: <span id="val-scroll">0%</span></div>
+      <div>Time: <span id="val-time">0.00s</span> / <span id="val-duration">0.00s</span></div>
+      <div>Status: <span id="val-status">Initializing...</span></div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    Scroll Down to Play Video ⬇️
+  </div>
+
+  <div class="scroll-container">
+    <div class="viewport-container">
+      <video id="scroll-video" src="./0707(1).mp4" playsinline muted preload="auto"></video>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('scroll-video');
+    const valScroll = document.getElementById('val-scroll');
+    const valTime = document.getElementById('val-time');
+    const valDuration = document.getElementById('val-duration');
+    const valStatus = document.getElementById('val-status');
+
+    // Wait for metadata to load so we know the duration
+    video.addEventListener('loadedmetadata', () => {
+      valDuration.textContent = video.duration.toFixed(2) + 's';
+      valStatus.textContent = 'Ready to scroll';
+      updateTime(0);
+    });
+
+    video.addEventListener('seeking', () => {
+      valStatus.textContent = 'Seeking...';
+    });
+
+    video.addEventListener('seeked', () => {
+      valStatus.textContent = 'Ready';
+    });
+
+    function updateTime(percent) {
+      if (!video.duration) return;
+      const targetTime = percent * video.duration;
+      video.currentTime = targetTime;
+      valTime.textContent = targetTime.toFixed(2) + 's';
+    }
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = Math.max(0, Math.min(1, scrollTop / maxScroll));
+
+      valScroll.textContent = Math.round(scrollPercent * 100) + '%';
+      updateTime(scrollPercent);
+    });
+  </script>
+</body>
+</html>
