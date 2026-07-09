@@ -193,12 +193,17 @@ function StepCard({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(24px)',
-        transition: `opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
+        transition: `opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease`,
         textAlign: 'center',
-        padding: '32px 20px',
-        borderRadius: '20px',
-        background: hovered ? 'rgba(0,0,0,0.02)' : 'transparent',
+        padding: '40px 24px',
+        borderRadius: '24px',
+        background: '#FFFFFF',
+        border: '1px solid rgba(28, 25, 23, 0.06)',
+        boxShadow: hovered 
+          ? '0 20px 40px -15px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(28, 25, 23, 0.02)' 
+          : '0 4px 20px -10px rgba(28, 25, 23, 0.06)',
         cursor: 'default',
+        ...(hovered ? { transform: 'translateY(-4px)' } : {}),
       }}
     >
       {/* Icon Container */}
@@ -208,13 +213,13 @@ function StepCard({
           height: '72px',
           borderRadius: '20px',
           background: hovered
-            ? 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)'
-            : 'rgba(0,0,0,0.04)',
+            ? 'linear-gradient(135deg, #C84B31 0%, #E66A50 100%)'
+            : 'rgba(200, 75, 49, 0.08)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 20px',
-          color: hovered ? '#f5f0e6' : '#3a3a3a',
+          margin: '0 auto 24px',
+          color: hovered ? '#f5f0e6' : '#C84B31',
           transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           transform: hovered ? 'scale(1.05)' : 'scale(1)',
         }}
@@ -225,12 +230,11 @@ function StepCard({
       {/* Step Number */}
       <span
         style={{
-          fontSize: '11px',
+          fontSize: '12px',
           fontWeight: 700,
           textTransform: 'uppercase',
-          letterSpacing: '0.2em',
-          color: hovered ? '#1a1a1a' : '#aaa',
-          transition: 'color 0.3s ease',
+          letterSpacing: '0.15em',
+          color: '#C84B31',
           display: 'block',
           marginBottom: '10px',
         }}
@@ -244,7 +248,7 @@ function StepCard({
           fontSize: '18px',
           fontWeight: 600,
           color: '#1a1a1a',
-          marginBottom: '10px',
+          marginBottom: '12px',
           letterSpacing: '-0.01em',
         }}
       >
@@ -255,10 +259,8 @@ function StepCard({
       <p
         style={{
           fontSize: '14px',
-          lineHeight: 1.65,
-          color: '#777',
-          transition: 'color 0.3s ease',
-          ...(hovered ? { color: '#555' } : {}),
+          lineHeight: 1.7,
+          color: '#4A4A4A',
         }}
       >
         {step.description}

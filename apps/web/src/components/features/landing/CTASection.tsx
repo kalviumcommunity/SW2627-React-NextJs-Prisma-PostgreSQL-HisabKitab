@@ -82,7 +82,7 @@ export default function CTASection() {
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.2em',
-              color: 'rgba(200, 194, 162, 0.6)',
+              color: 'rgba(200, 194, 162, 0.85)',
               marginBottom: '20px',
               opacity: visible ? 1 : 0,
               transform: visible ? 'translateY(0)' : 'translateY(12px)',
@@ -115,7 +115,7 @@ export default function CTASection() {
             style={{
               fontSize: '15px',
               lineHeight: 1.7,
-              color: 'rgba(255,255,255,0.5)',
+              color: 'rgba(255,255,255,0.7)',
               maxWidth: '440px',
               margin: '0 auto 36px',
               opacity: visible ? 1 : 0,

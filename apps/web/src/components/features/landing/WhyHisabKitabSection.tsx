@@ -183,14 +183,18 @@ function ValueCard({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
-        padding: '32px',
-        borderRadius: '20px',
-        border: '1px solid rgba(0,0,0,0.05)',
-        background: hovered ? 'rgba(0,0,0,0.02)' : 'rgba(0,0,0,0.01)',
+        transition: `opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease`,
+        padding: '36px 32px',
+        borderRadius: '24px',
+        border: '1px solid rgba(28, 25, 23, 0.06)',
+        background: '#FFFFFF',
+        boxShadow: hovered
+          ? '0 20px 40px -15px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(28, 25, 23, 0.02)'
+          : '0 4px 20px -10px rgba(28, 25, 23, 0.06)',
         cursor: 'default',
         position: 'relative',
         overflow: 'hidden',
+        ...(hovered ? { transform: 'translateY(-4px)' } : {}),
       }}
     >
       {/* Accent bar */}
@@ -199,16 +203,16 @@ function ValueCard({
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '4px',
+          width: hovered ? '6px' : '4px',
           height: '100%',
           background: prop.accent,
-          opacity: hovered ? 1 : 0.4,
-          transition: 'opacity 0.3s ease',
-          borderRadius: '0 2px 2px 0',
+          opacity: hovered ? 1 : 0.6,
+          transition: 'all 0.3s ease',
+          borderRadius: '0 3px 3px 0',
         }}
       />
 
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
         {/* Icon */}
         <div
           style={{
@@ -216,13 +220,13 @@ function ValueCard({
             width: '48px',
             height: '48px',
             borderRadius: '14px',
-            background: `${prop.accent}12`,
+            background: `${prop.accent}15`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: prop.accent,
             transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            transform: hovered ? 'scale(1.06)' : 'scale(1)',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
           }}
         >
           {prop.icon}
@@ -234,7 +238,7 @@ function ValueCard({
               fontSize: '17px',
               fontWeight: 600,
               color: '#1a1a1a',
-              marginBottom: '8px',
+              marginBottom: '10px',
               letterSpacing: '-0.01em',
             }}
           >
@@ -244,9 +248,7 @@ function ValueCard({
             style={{
               fontSize: '14px',
               lineHeight: 1.7,
-              color: '#777',
-              transition: 'color 0.3s ease',
-              ...(hovered ? { color: '#555' } : {}),
+              color: '#4A4A4A',
             }}
           >
             {prop.description}

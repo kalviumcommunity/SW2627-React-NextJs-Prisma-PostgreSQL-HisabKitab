@@ -12,6 +12,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Real-Time Ledger',
+    color: '#10B981', // Emerald
     description:
       'Add a transaction and see the running balance update live — across every device, every screen. Powered by SSE, no page refresh ever needed.',
   },
@@ -25,6 +26,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Multi-User & Roles',
+    color: '#6366F1', // Indigo
     description:
       'Owner and Staff roles with configurable permissions. Your staff can add transactions — only you can delete them. Know who changed what, when.',
   },
@@ -39,6 +41,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Smart Audit Trail',
+    color: '#C84B31', // Terracotta
     description:
       'Every edit and delete is tracked — who changed it, when, and both old and new values. Soft deletes mean nothing is ever truly lost. 7-day trash/restore.',
   },
@@ -53,6 +56,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Worker & Salary',
+    color: '#8B5CF6', // Purple
     description:
       'Track attendance (present / absent / half-day), calculate pending salary for monthly or daily-wage workers, and record payments — all auditable.',
   },
@@ -67,6 +71,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Inventory & Expiry',
+    color: '#D4AF37', // Gold
     description:
       'Products, batches, stock movements with automated expiry alerts. Owner-approval workflow for adjustments and losses. Full stock visibility.',
   },
@@ -80,6 +85,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'AI Paper Migration',
+    color: '#14B8A6', // Teal
     description:
       'Photograph your old paper khata — AI extracts names and balances. Review everything before committing. Export as CSV even without saving to the app.',
   },
@@ -222,12 +228,16 @@ function FeatureCard({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
+        transition: `opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease`,
         cursor: 'default',
-        padding: '28px 24px',
-        borderRadius: '20px',
-        border: '1px solid rgba(0,0,0,0.04)',
-        background: hovered ? 'rgba(0,0,0,0.025)' : 'rgba(0,0,0,0.01)',
+        padding: '36px 28px',
+        borderRadius: '24px',
+        background: '#FFFFFF',
+        border: hovered ? `1px solid ${feature.color}` : '1px solid rgba(28, 25, 23, 0.06)',
+        boxShadow: hovered
+          ? '0 20px 40px -15px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(28, 25, 23, 0.02)'
+          : '0 4px 20px -10px rgba(28, 25, 23, 0.06)',
+        ...(hovered ? { transform: 'translateY(-4px)' } : {}),
       }}
     >
       {/* Icon */}
@@ -236,12 +246,12 @@ function FeatureCard({
           width: '56px',
           height: '56px',
           borderRadius: '16px',
-          background: hovered ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.03)',
+          background: hovered ? feature.color : `${feature.color}15`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: hovered ? '#1a1a1a' : '#666',
-          marginBottom: '18px',
+          color: hovered ? '#ffffff' : feature.color,
+          marginBottom: '20px',
           transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
           transform: hovered ? 'scale(1.05)' : 'scale(1)',
         }}
@@ -252,7 +262,7 @@ function FeatureCard({
       {/* Title */}
       <h3
         style={{
-          fontSize: '16px',
+          fontSize: '17px',
           fontWeight: 600,
           color: '#1a1a1a',
           marginBottom: '10px',
@@ -267,9 +277,7 @@ function FeatureCard({
         style={{
           fontSize: '13.5px',
           lineHeight: 1.7,
-          color: '#888',
-          transition: 'color 0.3s ease',
-          ...(hovered ? { color: '#666' } : {}),
+          color: '#4A4A4A',
         }}
       >
         {feature.description}

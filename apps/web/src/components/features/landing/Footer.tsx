@@ -85,7 +85,7 @@ export default function Footer() {
               style={{
                 fontSize: '13.5px',
                 lineHeight: 1.7,
-                color: '#888',
+                color: '#4A4A4A',
                 maxWidth: '260px',
                 marginBottom: '20px',
               }}
@@ -103,23 +103,23 @@ export default function Footer() {
                     width: '32px',
                     height: '32px',
                     borderRadius: '8px',
-                    background: 'rgba(0,0,0,0.04)',
+                    background: 'rgba(28, 25, 23, 0.04)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '11px',
                     fontWeight: 600,
-                    color: '#888',
+                    color: '#5A5A5A',
                     textDecoration: 'none',
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.08)';
+                    e.currentTarget.style.background = 'rgba(28, 25, 23, 0.08)';
                     e.currentTarget.style.color = '#1a1a1a';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.04)';
-                    e.currentTarget.style.color = '#888';
+                    e.currentTarget.style.background = 'rgba(28, 25, 23, 0.04)';
+                    e.currentTarget.style.color = '#5A5A5A';
                   }}
                 >
                   {label}
@@ -138,7 +138,7 @@ export default function Footer() {
         <div
           style={{
             paddingTop: '24px',
-            borderTop: '1px solid rgba(0,0,0,0.04)',
+            borderTop: '1px solid rgba(28, 25, 23, 0.08)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -146,10 +146,10 @@ export default function Footer() {
             gap: '12px',
           }}
         >
-          <p style={{ fontSize: '12.5px', color: '#aaa', fontWeight: 400 }}>
+          <p style={{ fontSize: '12.5px', color: '#5A5A5A', fontWeight: 400 }}>
             © {new Date().getFullYear()} Hisab Kitab. All rights reserved.
           </p>
-          <p style={{ fontSize: '12.5px', color: '#bbb', fontWeight: 400 }}>
+          <p style={{ fontSize: '12.5px', color: '#5A5A5A', fontWeight: 400 }}>
             Built with{' '}
             <span style={{ color: '#C84B31' }}>❤️</span>{' '}
             for shopkeepers everywhere
@@ -184,7 +184,7 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
           fontWeight: 600,
           textTransform: 'uppercase',
           letterSpacing: '0.15em',
-          color: '#555',
+          color: '#3A3A3A',
           marginBottom: '16px',
         }}
       >
@@ -209,7 +209,7 @@ function FooterLink({ label, href }: { label: string; href: string }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         fontSize: '13.5px',
-        color: hovered ? '#1a1a1a' : '#999',
+        color: hovered ? '#1a1a1a' : '#5A5A5A',
         textDecoration: 'none',
         transition: 'color 0.2s ease',
         fontWeight: 400,

@@ -323,7 +323,7 @@ export default function ScrollAnimation({
     >
       {/* Loading shimmer */}
       {!ready && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#C8C2A2] z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#F9F6EE] z-10">
           <div className="w-10 h-10 rounded-full border-[3px] border-[#3a3a3a]/20 border-t-[#3a3a3a] animate-spin" />
         </div>
       )}

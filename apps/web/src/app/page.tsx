@@ -38,7 +38,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="bg-[#C8C2A2]" style={{ minHeight: '300vh' }}>
+    <main className="bg-[#F9F6EE] paper-texture" style={{ minHeight: '300vh' }}>
       {/* ===== Navbar — hidden during scroll-lock, fades in on completion ===== */}
       <Navbar visible={animationComplete} />
 
@@ -65,14 +65,14 @@ export default function LandingPage() {
       {/* ===== Hero Text — fades in at ~55% progress over the dark ink ===== */}
       <HeroOverlay progress={progress} animationComplete={animationComplete} />
 
-      {/* ===== Content Sections — below the animation card ===== */}
-      <HowItWorksSection />
-      <FeaturesSection />
-      <WhyHisabKitabSection />
-      <CTASection />
-
-      {/* ===== Footer ===== */}
-      <Footer />
+      {/* ===== Content Sections & Footer — clean paper-cream backdrop with texture ===== */}
+      <div className="relative z-10 bg-[#F9F6EE] paper-texture" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.05)' }}>
+        <HowItWorksSection />
+        <FeaturesSection />
+        <WhyHisabKitabSection />
+        <CTASection />
+        <Footer />
+      </div>
     </main>
   );
 }

@@ -45,16 +45,16 @@ export default function Navbar({ visible }: NavbarProps) {
   }, []);
 
   const glassBackground = scrolled
-    ? 'rgba(200, 194, 162, 0.72)'
-    : 'rgba(200, 194, 162, 0.5)';
+    ? 'rgba(255, 255, 255, 0.85)'
+    : 'rgba(255, 255, 255, 0.65)';
 
   const glassBorder = scrolled
-    ? 'rgba(0, 0, 0, 0.08)'
-    : 'rgba(0, 0, 0, 0.04)';
+    ? 'rgba(28, 25, 23, 0.12)'
+    : 'rgba(28, 25, 23, 0.08)';
 
   const glassShadow = scrolled
-    ? '0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)'
-    : '0 4px 20px rgba(0, 0, 0, 0.04)';
+    ? '0 10px 30px -10px rgba(28, 25, 23, 0.12), 0 1px 3px rgba(28, 25, 23, 0.05)'
+    : '0 4px 20px -5px rgba(28, 25, 23, 0.05)';
 
   return (
     <>
@@ -285,8 +285,8 @@ export default function Navbar({ visible }: NavbarProps) {
             maxWidth: '880px',
             margin: '8px auto 0',
             borderRadius: '24px',
-            background: 'rgba(200, 194, 162, 0.88)',
-            border: '1px solid rgba(0,0,0,0.06)',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1px solid rgba(28, 25, 23, 0.12)',
             boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
             overflow: 'hidden',
             maxHeight: mobileOpen ? '400px' : '0',
