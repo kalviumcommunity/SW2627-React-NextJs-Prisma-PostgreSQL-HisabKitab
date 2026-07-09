@@ -19,6 +19,8 @@ interface ScrollAnimationProps {
   zoomTargetScale?: number;
   onProgress?: (progress: number) => void;
   onComplete?: () => void;
+  /** Called when user scrolls back up and re-enters the animation */
+  onReEngage?: () => void;
   stickyAfterComplete?: boolean;
 }
 
@@ -37,6 +39,7 @@ export default function ScrollAnimation({
   zoomTargetScale = 0.95,
   onProgress,
   onComplete,
+  onReEngage,
   stickyAfterComplete = false,
 }: ScrollAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,8 +47,8 @@ export default function ScrollAnimation({
   const [ready, setReady] = useState(false);
   const [phase, setPhase] = useState<'locked' | 'zooming' | 'released'>('locked');
 
-  const cbRef = useRef({ onProgress, onComplete });
-  cbRef.current = { onProgress, onComplete };
+  const cbRef = useRef({ onProgress, onComplete, onReEngage });
+  cbRef.current = { onProgress, onComplete, onReEngage };
 
   const totalFrames = endFrame - startFrame;
 
@@ -98,7 +101,7 @@ export default function ScrollAnimation({
 
     function drawFrame(index: number) {
       const img = e.cache.get(index);
-      if (!img || !canvas) return;
+      if (!img || !canvas || !ctx) return;
 
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -256,6 +259,7 @@ export default function ScrollAnimation({
         document.body.style.overflow = 'hidden';
         window.scrollTo(0, 0);
 
+        cbRef.current.onReEngage?.();
         setPhase('zooming');
 
         // Start from full zoom, scroll back

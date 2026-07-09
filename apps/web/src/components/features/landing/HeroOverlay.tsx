@@ -25,15 +25,12 @@ export default function HeroOverlay({ progress, animationComplete }: HeroOverlay
     };
   }, [show, progress]);
 
-  // Hide during released phase
-  if (animationComplete) return null;
-
   return (
     <div
-      className="fixed inset-0 z-40 pointer-events-none flex items-center"
+      className={`${animationComplete ? 'absolute' : 'fixed'} inset-0 z-40 pointer-events-none flex items-center`}
       style={{ opacity: show ? 1 : 0 }}
     >
-      <div className="w-[45%] pl-[8%] flex flex-col" style={{ gap: '1.2rem' }}>
+      <div className="w-[45%] flex flex-col" style={{ gap: '1.2rem', marginLeft: '12%', paddingLeft: '22px', marginBottom: "60px" }}>
         {/* Title — editorial serif, confident sizing */}
         <h1
           style={{

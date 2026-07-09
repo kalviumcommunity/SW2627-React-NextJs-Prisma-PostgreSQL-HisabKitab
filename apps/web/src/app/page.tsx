@@ -4,7 +4,11 @@ import { useState, useCallback } from 'react';
 import Navbar from '@/components/features/landing/Navbar';
 import ScrollAnimation from '@/components/features/landing/ScrollAnimation';
 import HeroOverlay from '@/components/features/landing/HeroOverlay';
+import PaperIntro from '@/components/features/landing/PaperIntro';
+import HowItWorksSection from '@/components/features/landing/HowItWorksSection';
 import FeaturesSection from '@/components/features/landing/FeaturesSection';
+import WhyHisabKitabSection from '@/components/features/landing/WhyHisabKitabSection';
+import CTASection from '@/components/features/landing/CTASection';
 import Footer from '@/components/features/landing/Footer';
 
 // Frame manifest — extracted from reference/0709.mp4
@@ -29,6 +33,10 @@ export default function LandingPage() {
     setAnimationComplete(true);
   }, []);
 
+  const handleReEngage = useCallback(() => {
+    setAnimationComplete(false);
+  }, []);
+
   return (
     <main className="bg-[#C8C2A2]" style={{ minHeight: '300vh' }}>
       {/* ===== Navbar — hidden during scroll-lock, fades in on completion ===== */}
@@ -47,14 +55,21 @@ export default function LandingPage() {
         lerpFactor={0.1}
         onProgress={handleProgress}
         onComplete={handleComplete}
+        onReEngage={handleReEngage}
         stickyAfterComplete
       />
+
+      {/* ===== Paper Intro — engaging text on blank paper, fades as ink begins ===== */}
+      <PaperIntro progress={progress} />
 
       {/* ===== Hero Text — fades in at ~55% progress over the dark ink ===== */}
       <HeroOverlay progress={progress} animationComplete={animationComplete} />
 
-      {/* ===== Features Section — below the animation card ===== */}
+      {/* ===== Content Sections — below the animation card ===== */}
+      <HowItWorksSection />
       <FeaturesSection />
+      <WhyHisabKitabSection />
+      <CTASection />
 
       {/* ===== Footer ===== */}
       <Footer />
