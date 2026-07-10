@@ -1,0 +1,30 @@
+{
+  "name": "@hisab-kitab/server",
+  "version": "1.0.0",
+  "description": "Hisab Kitab — Express REST API Backend (Port 4000)",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "start": "cross-env NODE_ENV=production node src/index.js",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@hisab-kitab/database": "file:../../packages/database",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-async-errors": "^3.1.1",
+    "firebase-admin": "^12.2.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.11.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.3"
+  }
+}

@@ -140,7 +140,7 @@ export default function CTASection() {
             }}
           >
             <a
-              href="#get-started"
+              href="/register"
               style={{
                 fontSize: '14px',
                 fontWeight: 600,

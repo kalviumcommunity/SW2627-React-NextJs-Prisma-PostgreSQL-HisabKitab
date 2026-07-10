@@ -58,3 +58,5 @@ apps/web/public/swe-worker-*.js
 .agents/*
 
 reference/*
+AGENTS.md
+CLAUDE.md

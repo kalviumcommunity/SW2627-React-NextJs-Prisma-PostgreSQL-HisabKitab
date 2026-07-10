@@ -14,6 +14,8 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+import Providers from "@/components/layout/Providers";
+
 export const metadata: Metadata = {
   title: "Hisab Kitab — Digital Ledger for Shopkeepers",
   description:
@@ -34,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

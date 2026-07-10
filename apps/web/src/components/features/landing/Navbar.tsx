@@ -175,7 +175,7 @@ export default function Navbar({ visible }: NavbarProps) {
             className="hidden md:flex"
           >
             <a
-              href="#login"
+              href="/login"
               style={{
                 fontSize: '13px',
                 fontWeight: 500,
@@ -199,7 +199,7 @@ export default function Navbar({ visible }: NavbarProps) {
               Log in
             </a>
             <a
-              href="#get-started"
+              href="/register"
               style={{
                 fontSize: '13px',
                 fontWeight: 600,
@@ -320,7 +320,7 @@ export default function Navbar({ visible }: NavbarProps) {
             <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '8px 0' }} />
             <div style={{ display: 'flex', gap: '8px', padding: '4px 0 8px' }}>
               <a
-                href="#login"
+                href="/login"
                 style={{
                   flex: 1,
                   fontSize: '14px',
@@ -337,7 +337,7 @@ export default function Navbar({ visible }: NavbarProps) {
                 Log in
               </a>
               <a
-                href="#get-started"
+                href="/register"
                 style={{
                   flex: 1,
                   fontSize: '14px',
