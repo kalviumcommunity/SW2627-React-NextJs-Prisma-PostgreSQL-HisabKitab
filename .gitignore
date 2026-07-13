@@ -60,3 +60,4 @@ apps/web/public/swe-worker-*.js
 reference/*
 AGENTS.md
 CLAUDE.md
+schema.sql
