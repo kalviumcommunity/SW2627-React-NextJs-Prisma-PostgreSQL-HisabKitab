@@ -49,7 +49,7 @@ export default function LandingPage() {
         basePath={ANIMATION_CONFIG.basePath}
         prefix={ANIMATION_CONFIG.prefix}
         format={ANIMATION_CONFIG.format}
-        totalWheelTravel={5000}
+        totalWheelTravel={2000}
         bufferAhead={40}
         bufferBehind={20}
         lerpFactor={0.1}

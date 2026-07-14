@@ -1,135 +1,217 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useEffect } from 'react';
+import Image from 'next/image';
+import { motion, useMotionValue, useTransform, MotionValue } from 'framer-motion';
 
 const FEATURES = [
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="18" cy="18" r="13" />
-        <path d="M18 10v8l5 3" />
-        <circle cx="18" cy="18" r="2" fill="currentColor" stroke="none" />
-      </svg>
-    ),
+    image: '/images/feature_ledger.png',
     title: 'Real-Time Ledger',
-    color: '#10B981', // Emerald
+    color: '#10B981',
     description:
       'Add a transaction and see the running balance update live — across every device, every screen. Powered by SSE, no page refresh ever needed.',
+    role: 'Live Financial Tracking',
+    services: ['Real-Time Balance', 'SSE Sync', 'Multi-Device', 'Instant Updates'],
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="14" cy="13" r="4.5" />
-        <path d="M5 30c0-5 4-9 9-9s9 4 9 9" />
-        <circle cx="25" cy="12" r="3" />
-        <path d="M27 20c2.5 0 4.5 2 4.5 4.5V27" />
-      </svg>
-    ),
+    image: '/images/feature_roles.png',
     title: 'Multi-User & Roles',
-    color: '#6366F1', // Indigo
+    color: '#6366F1',
     description:
       'Owner and Staff roles with configurable permissions. Your staff can add transactions — only you can delete them. Know who changed what, when.',
+    role: 'Access Management',
+    services: ['Owner / Staff Roles', 'Permission Control', 'Activity Logs', 'Secure Access'],
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 4L4 10v12l12 6 12-6V10L16 4z" />
-        <line x1="4" y1="10" x2="16" y2="16" />
-        <line x1="28" y1="10" x2="16" y2="16" />
-        <line x1="16" y1="16" x2="16" y2="28" />
-        <polyline points="10 7 16 10 22 7" />
-      </svg>
-    ),
+    image: '/images/feature_audit.png',
     title: 'Smart Audit Trail',
-    color: '#C84B31', // Terracotta
+    color: '#C84B31',
     description:
-      'Every edit and delete is tracked — who changed it, when, and both old and new values. Soft deletes mean nothing is ever truly lost. 7-day trash/restore.',
+      'Every edit and delete is tracked — who changed it, when, and both old and new values. Soft deletes mean nothing is ever truly lost.',
+    role: 'Complete Accountability',
+    services: ['Change History', 'Soft Deletes', '7-Day Restore', 'Full Transparency'],
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="4" y="6" width="28" height="24" rx="2" />
-        <line x1="4" y1="12" x2="32" y2="12" />
-        <circle cx="10" cy="20" r="2" />
-        <line x1="16" y1="19" x2="26" y2="19" />
-        <line x1="16" y1="23" x2="22" y2="23" />
-      </svg>
-    ),
+    image: '/images/feature_worker.png',
     title: 'Worker & Salary',
-    color: '#8B5CF6', // Purple
+    color: '#8B5CF6',
     description:
-      'Track attendance (present / absent / half-day), calculate pending salary for monthly or daily-wage workers, and record payments — all auditable.',
+      'Track attendance (present / absent / half-day), calculate pending salary for monthly or daily-wage workers, and record payments.',
+    role: 'Workforce Management',
+    services: ['Attendance Tracking', 'Salary Calculation', 'Payment Records', 'Wage Modes'],
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="6" y="8" width="24" height="22" rx="2" />
-        <line x1="6" y1="14" x2="30" y2="14" />
-        <line x1="12" y1="8" x2="12" y2="4" />
-        <line x1="24" y1="8" x2="24" y2="4" />
-        <path d="M14 22l2.5 2.5L21 19" />
-      </svg>
-    ),
+    image: '/images/feature_inventory.png',
     title: 'Inventory & Expiry',
-    color: '#D4AF37', // Gold
+    color: '#D4AF37',
     description:
-      'Products, batches, stock movements with automated expiry alerts. Owner-approval workflow for adjustments and losses. Full stock visibility.',
+      'Products, batches, stock movements with automated expiry alerts. Owner-approval workflow for adjustments and losses.',
+    role: 'Stock Control',
+    services: ['Batch Tracking', 'Expiry Alerts', 'Stock Movements', 'Approval Workflow'],
   },
   {
-    icon: (
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="6" y="4" width="18" height="24" rx="2" />
-        <polyline points="24 10 30 10 30 32 12 32 12 28" />
-        <circle cx="15" cy="16" r="4" />
-        <path d="M11 23c0-2.2 1.8-4 4-4s4 1.8 4 4" />
-      </svg>
-    ),
+    image: '/images/feature_ai.png',
     title: 'AI Paper Migration',
-    color: '#14B8A6', // Teal
+    color: '#14B8A6',
     description:
-      'Photograph your old paper khata — AI extracts names and balances. Review everything before committing. Export as CSV even without saving to the app.',
+      'Photograph your old paper khata — AI extracts names and balances. Review everything before committing. Export as CSV anytime.',
+    role: 'Intelligent Digitization',
+    services: ['Photo Capture', 'AI Extraction', 'Review & Edit', 'CSV Export'],
   },
 ];
 
 export default function FeaturesSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  const containerRef = useRef<HTMLElement>(null);
+  
+  // Custom progress driven by wheel events instead of page scroll
+  const progress = useMotionValue(0);
+  const wheelAccum = useRef(0);
+  const totalTravel = FEATURES.length * 600; // Total manual scroll travel needed
 
   useEffect(() => {
-    const el = sectionRef.current;
+    const el = containerRef.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
+    let isLocked = false;
+    let ticking = false;
+
+    const lockScroll = () => {
+      isLocked = true;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      el.scrollIntoView({ behavior: 'auto' });
+    };
+
+    const unlockScroll = (direction: 'up' | 'down') => {
+      isLocked = false;
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      // Push slightly past the lock boundary to prevent instant re-locking
+      if (direction === 'down') {
+         window.scrollBy(0, 20);
+      } else {
+         window.scrollBy(0, -20);
+      }
+    };
+
+    const handleInput = (deltaY: number, preventDefaultFn: () => void) => {
+      if (isLocked) {
+        preventDefaultFn();
+        
+        // Accumulate progress
+        const delta = Math.abs(deltaY) > 100 ? deltaY * 0.4 : deltaY;
+        const newAccum = wheelAccum.current + delta;
+        
+        if (newAccum <= 0) {
+          wheelAccum.current = 0;
+          progress.set(0);
+          unlockScroll('up');
+        } else if (newAccum >= totalTravel) {
+          wheelAccum.current = totalTravel;
+          progress.set(1);
+          unlockScroll('down');
+        } else {
+          wheelAccum.current = newAccum;
+          progress.set(newAccum / totalTravel);
         }
-      },
-      { threshold: 0.08 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+      } else {
+        // Predictive lock for smooth entry (before native scroll takes over)
+        const rect = el.getBoundingClientRect();
+        const currentProgress = progress.get();
+        const nextTop = rect.top - deltaY;
+        
+        if (deltaY > 0 && rect.top > -50 && nextTop <= 0 && currentProgress === 0) {
+           preventDefaultFn();
+           lockScroll();
+        }
+        else if (deltaY < 0 && rect.bottom < window.innerHeight + 50 && (rect.bottom - deltaY) >= window.innerHeight && currentProgress === 1) {
+           preventDefaultFn();
+           lockScroll();
+        }
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      handleInput(e.deltaY, () => e.preventDefault());
+    };
+
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+       touchStartY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+       const touchY = e.touches[0].clientY;
+       const deltaY = touchStartY - touchY; 
+       handleInput(deltaY * 2, () => e.preventDefault()); // Multiply for touch speed
+       if (isLocked) {
+         touchStartY = touchY;
+       }
+    };
+
+    // Fallback for momentum scrolling (e.g. fast swipe on mobile/mac)
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (isLocked) {
+             // Force lock if native scroll somehow escaped
+             el.scrollIntoView({ behavior: 'auto' });
+          } else {
+             const rect = el.getBoundingClientRect();
+             const currentProgress = progress.get();
+             // Lock if boundary crossed natively
+             if (rect.top <= 2 && rect.top > -100 && currentProgress === 0) {
+                lockScroll();
+             } else if (rect.bottom >= window.innerHeight - 2 && rect.bottom < window.innerHeight + 100 && currentProgress === 1) {
+                lockScroll();
+             }
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('scroll', onScroll);
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [progress, totalTravel]);
 
   return (
     <section
-      ref={sectionRef}
+      ref={containerRef}
       id="features"
       style={{
-        padding: '80px 24px 100px',
+        // 100vh height to freeze native scrollbar
+        height: '100vh',
         fontFamily: 'var(--font-inter), system-ui, sans-serif',
+        backgroundColor: '#F9F6EE',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        padding: '24px',
       }}
     >
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        {/* Section Heading — editorial, asymmetric */}
+      <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        
+        {/* Section Heading - Static while scrolling */}
         <div
           style={{
             textAlign: 'center',
-            marginBottom: '72px',
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translateY(0)' : 'translateY(24px)',
-            transition: 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+            marginBottom: '60px',
           }}
         >
           <p
@@ -147,20 +229,19 @@ export default function FeaturesSection() {
           <h2
             style={{
               fontFamily: 'var(--font-playfair), Georgia, serif',
-              fontSize: 'clamp(28px, 3.5vw, 44px)',
+              fontSize: 'clamp(32px, 4vw, 56px)',
               fontWeight: 600,
               color: '#1a1a1a',
               lineHeight: 1.15,
               letterSpacing: '-0.025em',
-              marginBottom: '18px',
+              marginBottom: '24px',
             }}
           >
-            Everything your shop needs.<br />
-            Nothing it doesn&apos;t.
+            What We Offer
           </h2>
           <p
             style={{
-              fontSize: '15px',
+              fontSize: '16px',
               lineHeight: 1.7,
               color: '#6b6b6b',
               maxWidth: '520px',
@@ -168,120 +249,268 @@ export default function FeaturesSection() {
             }}
           >
             A complete digital ledger with real-time sync, worker management,
-            inventory tracking, and AI-powered migration — purpose-built for
-            Indian shopkeepers.
+            inventory tracking, and AI-powered migration.
           </p>
         </div>
 
-        {/* Feature Cards — 3×2 grid, staggered reveals */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '24px',
-          }}
-          className="features-grid"
-        >
+        {/* Cards Stack */}
+        <div style={{ position: 'relative', width: '100%', height: '450px' }}>
           {FEATURES.map((feature, i) => (
             <FeatureCard
               key={feature.title}
               feature={feature}
-              visible={visible}
-              delay={i * 80}
+              index={i}
+              total={FEATURES.length}
+              progress={progress}
             />
           ))}
         </div>
       </div>
-
-      {/* Responsive: 2-col on tablet, 1-col on mobile */}
-      <style jsx>{`
-        @media (max-width: 900px) {
-          .features-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        @media (max-width: 600px) {
-          .features-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
 
 function FeatureCard({
   feature,
-  visible,
-  delay,
+  index,
+  total,
+  progress,
 }: {
   feature: (typeof FEATURES)[number];
-  visible: boolean;
-  delay: number;
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const rangeStart = (index - 1) / total;
+  const rangeEnd = index / total;
+
+  // Make sure input ranges are strictly increasing and bounded within [0, 1]
+  const yInput = index === 0 ? [0, 1] : [rangeStart, rangeEnd];
+  const yOutput = index === 0 ? ['0vh', '0vh'] : ['100vh', '0vh'];
+  const y = useTransform(progress, yInput, yOutput);
+
+  // Each card scales down slightly after it arrives
+  const minScale = 1 - (total - 1 - index) * 0.04;
+  const scaleInput = rangeEnd >= 1 ? [0, 1] : [rangeEnd, 1];
+  const scaleOutput = rangeEnd >= 1 ? [1, 1] : [1, minScale];
+  const scale = useTransform(progress, scaleInput, scaleOutput);
+
+  // Cards slide in with a tilt from the start, alternating directions
+  const initialTilt = index % 2 === 0 ? -4 : 4;
+  const settledTilt = index % 2 === 0 ? -2 : 2;
+  
+  // Rotate during the slide-in phase so it starts with a larger tilt and settles
+  const rotateInput = index === 0 ? [0, 1] : [rangeStart, rangeEnd];
+  const rotateOutput = index === 0 ? [settledTilt, settledTilt] : [initialTilt, settledTilt];
+  const rotate = useTransform(progress, rotateInput, rotateOutput);
+
+  // Small fade-in for the cards (except the first one which is always visible)
+  const opacityInput = index === 0 ? [0, 1] : [rangeStart, rangeStart + 0.01];
+  const opacityOutput = index === 0 ? [1, 1] : [0, 1];
+  const opacity = useTransform(progress, opacityInput, opacityOutput);
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <motion.div
       style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease`,
-        cursor: 'default',
-        padding: '36px 28px',
-        borderRadius: '24px',
-        background: '#FFFFFF',
-        border: hovered ? `1px solid ${feature.color}` : '1px solid rgba(28, 25, 23, 0.06)',
-        boxShadow: hovered
-          ? '0 20px 40px -15px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(28, 25, 23, 0.02)'
-          : '0 4px 20px -10px rgba(28, 25, 23, 0.06)',
-        ...(hovered ? { transform: 'translateY(-4px)' } : {}),
+        position: 'absolute',
+        top: `${index * 15}px`, // Slight staggering top gap
+        left: 0,
+        right: 0,
+        y,
+        scale,
+        rotate,
+        opacity,
+        transformOrigin: 'top center',
+        zIndex: index + 1,
       }}
     >
-      {/* Icon */}
       <div
         style={{
-          width: '56px',
-          height: '56px',
-          borderRadius: '16px',
-          background: hovered ? feature.color : `${feature.color}15`,
-          display: 'flex',
+          backgroundColor: '#1a1a1a',
+          color: '#ffffff',
+          borderRadius: '28px',
+          padding: '56px',
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 1fr 0.8fr',
+          gap: '48px',
           alignItems: 'center',
-          justifyContent: 'center',
-          color: hovered ? '#ffffff' : feature.color,
-          marginBottom: '20px',
-          transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
-          transform: hovered ? 'scale(1.05)' : 'scale(1)',
+          minHeight: '380px',
+          boxShadow: '0 -16px 48px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
         }}
+        className="feature-card-inner"
       >
-        {feature.icon}
+        {/* Column 1 — Index + Title + Description */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '13px',
+              color: '#888888',
+              marginBottom: '28px',
+              fontFamily: 'var(--font-inter), monospace',
+              letterSpacing: '0.12em',
+              fontWeight: 500,
+            }}
+          >
+            {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+          </div>
+
+          <h3
+            style={{
+              fontSize: 'clamp(28px, 3vw, 42px)',
+              fontWeight: 600,
+              color: '#ffffff',
+              marginBottom: '20px',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+            }}
+          >
+            {feature.title}
+          </h3>
+
+          <p
+            style={{
+              fontSize: '16px',
+              lineHeight: 1.7,
+              color: '#bbbbbb',
+              maxWidth: '95%',
+            }}
+          >
+            {feature.description}
+          </p>
+
+          <div
+            style={{
+              height: '2px',
+              width: '36px',
+              backgroundColor: feature.color,
+              marginTop: '32px',
+              opacity: 0.85,
+            }}
+          />
+        </div>
+
+        {/* Column 2 — Image */}
+        <div
+          style={{
+            position: 'relative',
+            height: '280px',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.06)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.35)',
+          }}
+        >
+          <Image
+            src={feature.image}
+            alt={feature.title}
+            fill
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
+
+        {/* Column 3 — Role & Services */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: '32px',
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                color: '#888888',
+                marginBottom: '8px',
+              }}
+            >
+              Role
+            </div>
+            <div
+              style={{
+                fontSize: '15px',
+                fontWeight: 500,
+                color: '#eeeeee',
+                lineHeight: 1.4,
+              }}
+            >
+              {feature.role}
+            </div>
+          </div>
+
+          <div>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                color: '#888888',
+                marginBottom: '12px',
+              }}
+            >
+              Services
+            </div>
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              {feature.services.map((s) => (
+                <li
+                  key={s}
+                  style={{
+                    fontSize: '14px',
+                    color: '#bbbbbb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '50%',
+                      backgroundColor: feature.color,
+                      flexShrink: 0,
+                      opacity: 0.7,
+                    }}
+                  />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
-      {/* Title */}
-      <h3
-        style={{
-          fontSize: '17px',
-          fontWeight: 600,
-          color: '#1a1a1a',
-          marginBottom: '10px',
-          letterSpacing: '-0.01em',
-        }}
-      >
-        {feature.title}
-      </h3>
-
-      {/* Description */}
-      <p
-        style={{
-          fontSize: '13.5px',
-          lineHeight: 1.7,
-          color: '#4A4A4A',
-        }}
-      >
-        {feature.description}
-      </p>
-    </div>
+      <style jsx>{`
+        @media (max-width: 900px) {
+          .feature-card-inner {
+            grid-template-columns: 1fr !important;
+            padding: 40px 28px !important;
+            gap: 32px !important;
+            min-height: auto !important;
+          }
+        }
+      `}</style>
+    </motion.div>
   );
 }
