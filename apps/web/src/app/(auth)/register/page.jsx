@@ -1,124 +1,334 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Mail, Lock, Store, ArrowRight, ArrowLeft } from "lucide-react";
+import styles from "./Register.module.css";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [focusedField, setFocusedField] = useState(null);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [shopName, setShopName] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
+    setStep(2);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
+    if (!shopName) {
+      setError("Shop name is required.");
+      return;
+    }
+
     setError("");
     setLoading(true);
+
     try {
-      const registerRes = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, shopName }),
       });
-      const data = await registerRes.json();
-      if (!registerRes.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to register.");
         setLoading(false);
-        return;
-      }
-      const signInRes = await signIn("credentials", { redirect: false, email, password });
-      if (signInRes?.error) {
-        router.push("/login?registered=true");
       } else {
-        router.push("/dashboard");
-        router.refresh();
+        router.push("/login?registered=true");
       }
     } catch (err) {
-      setError("Failed to connect. Please check your network and try again.");
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
 
-  const inputCls = "w-full bg-[#FBFBFA] border border-[#1C1917]/15 rounded-xl px-6 py-4 text-base text-[#1C1917] placeholder-[#1C1917]/30 outline-none";
-
   return (
-    <main className="min-h-screen w-full bg-[#F9F6EE] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden select-none">
-      <div className="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-[#1C1917]/20 pointer-events-none"></div>
-      <div className="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-[#1C1917]/20 pointer-events-none"></div>
-      <div className="absolute bottom-8 left-8 w-16 h-16 border-b-2 border-l-2 border-[#1C1917]/20 pointer-events-none"></div>
-      <div className="absolute bottom-8 right-8 w-16 h-16 border-b-2 border-r-2 border-[#1C1917]/20 pointer-events-none"></div>
+    <main className={styles.container}>
+      {/* ═══════════════ LEFT: HERO ILLUSTRATION ═══════════════ */}
+      <section className={styles.leftPanel}>
+        <div className={styles.textureOverlay} />
+        <div className={styles.ambientGlow} />
 
-      <div className="w-full max-w-[560px] z-10">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-block">
-            <h1 className="font-serif text-3xl font-semibold text-[#1C1917] tracking-tight">
-              हिसाब <span className="text-[#D97706] font-normal italic">किताब</span>
-            </h1>
-          </Link>
-          <p className="text-xs font-sans text-[#5A5A5A] uppercase tracking-[0.2em] mt-2">Digital Khata Ledger</p>
+        <div className={styles.heroContent}>
+          <div className={styles.heroImageContainer}>
+            <Image
+              src="/ledger-hero.png"
+              alt="Vintage ledger notebook"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className={styles.heroImageOverlay} />
+          </div>
+
+          <motion.div
+            className={styles.heroText}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <p className={styles.heroTagline}>
+              हर <span className={styles.heroTaglineHighlight1}>हिसाब</span>, हर{" "}
+              <span className={styles.heroTaglineHighlight2}>किताब</span>
+            </p>
+            <p className={styles.heroSubtext}>Your digital khata, modernized</p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════════════ RIGHT: REGISTER FORM ═══════════════ */}
+      <section className={styles.rightPanel}>
+        <div className={styles.mobileHero}>
+          <Image
+            src="/ledger-hero.png"
+            alt="Vintage ledger notebook"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
 
-        <div className="bg-white border border-[#1C1917]/10 shadow-lg rounded-2xl px-8 sm:px-12 py-[73px] relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[3px] bg-[#D97706] rounded-b-full"></div>
-          <h2 className="text-2xl font-serif font-medium text-[#1C1917] mb-2 text-center">Create Account & Shop</h2>
-          <p className="text-sm font-sans text-[#6C6967] text-center mb-8">Register and setup your first shop in one step</p>
+        <div className={styles.formContainer}>
+          {/* Branding */}
+          <div className={styles.branding}>
+            <Link href="/" className={styles.brandingTitle}>
+              Hisab <span className={styles.brandingHighlight}>Kitab</span>
+            </Link>
+          </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-md">
-              <p className="text-xs font-medium text-red-700">{error}</p>
+          {/* Register card */}
+          <div className={styles.registerCard}>
+            <div className={styles.cardAccent} />
+            <h2 className={styles.cardTitle}>Create Account & Shop</h2>
+            <p className={styles.cardSubtitle}>Register and setup your first shop</p>
+
+            {/* Error display */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  className={styles.errorBox}
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginBottom: "2rem" }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                >
+                  <div className={styles.errorText}>{error}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence mode="wait">
+              {step === 1 ? (
+                <motion.form
+                  key="step1"
+                  onSubmit={handleNext}
+                  initial={{ opacity: 0, x: -40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                  <div className={styles.stepIndicator}>
+                    <span className={styles.stepBadge}>Step 1</span>
+                    <span className={styles.stepTitle}>Account Details</span>
+                    <div className={styles.stepLine} />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label
+                        htmlFor="name"
+                        className={`${styles.label} ${
+                          focusedField === "name" ? styles.labelFocused : ""
+                        }`}
+                      >
+                        Full Name
+                      </label>
+                      <div className={styles.inputWrapper}>
+                        <User
+                          size={20}
+                          className={`${styles.inputIcon} ${
+                            focusedField === "name" ? styles.inputIconFocused : ""
+                          }`}
+                        />
+                        <input
+                          id="name"
+                          type="text"
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          onFocus={() => setFocusedField("name")}
+                          onBlur={() => setFocusedField(null)}
+                          placeholder="Rajesh Sharma"
+                          className={styles.input}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label
+                        htmlFor="email"
+                        className={`${styles.label} ${
+                          focusedField === "email" ? styles.labelFocused : ""
+                        }`}
+                      >
+                        Email
+                      </label>
+                      <div className={styles.inputWrapper}>
+                        <Mail
+                          size={20}
+                          className={`${styles.inputIcon} ${
+                            focusedField === "email" ? styles.inputIconFocused : ""
+                          }`}
+                        />
+                        <input
+                          id="email"
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          onFocus={() => setFocusedField("email")}
+                          onBlur={() => setFocusedField(null)}
+                          placeholder="rajesh@example.com"
+                          className={styles.input}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label
+                      htmlFor="password"
+                      className={`${styles.label} ${
+                        focusedField === "password" ? styles.labelFocused : ""
+                      }`}
+                    >
+                      Password
+                    </label>
+                    <div className={styles.inputWrapper}>
+                      <Lock
+                        size={20}
+                        className={`${styles.inputIcon} ${
+                          focusedField === "password" ? styles.inputIconFocused : ""
+                        }`}
+                      />
+                      <input
+                        id="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setFocusedField("password")}
+                        onBlur={() => setFocusedField(null)}
+                        placeholder="Minimum 6 characters"
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className={styles.submitBtn}>
+                    <span>Continue</span>
+                    <ArrowRight size={18} />
+                  </button>
+                </motion.form>
+              ) : (
+                <motion.form
+                  key="step2"
+                  onSubmit={handleSubmit}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 40 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                  <div className={styles.stepIndicator}>
+                    <span className={styles.stepBadge}>Step 2</span>
+                    <span className={styles.stepTitle}>Shop Details</span>
+                    <div className={styles.stepLine} />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label
+                      htmlFor="shopName"
+                      className={`${styles.label} ${
+                        focusedField === "shopName" ? styles.labelFocused : ""
+                      }`}
+                    >
+                      Shop / Business Name
+                    </label>
+                    <div className={styles.inputWrapper}>
+                      <Store
+                        size={20}
+                        className={`${styles.inputIcon} ${
+                          focusedField === "shopName" ? styles.inputIconFocused : ""
+                        }`}
+                      />
+                      <input
+                        id="shopName"
+                        type="text"
+                        required
+                        value={shopName}
+                        onChange={(e) => setShopName(e.target.value)}
+                        onFocus={() => setFocusedField("shopName")}
+                        onBlur={() => setFocusedField(null)}
+                        placeholder="Sharma Kirana Store"
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "1rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className={styles.submitBtn}
+                      style={{ flex: "0 0 auto", width: "auto", backgroundColor: "transparent", color: "#1a1a1a", border: "1px solid rgba(26,26,26,0.2)", boxShadow: "none" }}
+                    >
+                      <ArrowLeft size={18} />
+                    </button>
+                    <button type="submit" disabled={loading} className={styles.submitBtn} style={{ flex: 1 }}>
+                      {loading ? (
+                        <>
+                          <div className={styles.spinner} />
+                          <span>Setting up...</span>
+                        </>
+                      ) : (
+                        <span>Register & Setup Shop</span>
+                      )}
+                    </button>
+                  </div>
+                </motion.form>
+              )}
+            </AnimatePresence>
+
+            {/* Divider */}
+            <div className={styles.divider}>
+              <p className={styles.footerText}>
+                Already have an account?
+                <Link href="/login" className={styles.footerLink}>
+                  Log In
+                </Link>
+              </p>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] bg-[#1C1917]/5 text-[#1C1917]/60 font-sans font-semibold uppercase tracking-wider px-2 py-0.5 rounded">Step 1</span>
-              <span className="text-xs font-serif font-medium text-[#1C1917]/50">Account Details</span>
-              <div className="flex-grow h-[1px] bg-[#1C1917]/10"></div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="space-y-1.5 flex-1">
-                <label htmlFor="name" className="text-xs font-sans font-medium text-[#3C3937] uppercase tracking-wider">Full Name</label>
-                <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Rahul Kumar" className={inputCls} />
-              </div>
-              <div className="space-y-1.5 flex-1">
-                <label htmlFor="email" className="text-xs font-sans font-medium text-[#3C3937] uppercase tracking-wider">Email</label>
-                <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="rahul@example.com" className={inputCls} />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="text-xs font-sans font-medium text-[#3C3937] uppercase tracking-wider">Password</label>
-              <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" className={inputCls} />
-            </div>
-
-            <div className="flex items-center gap-2 pt-4 mb-2">
-              <span className="text-[10px] bg-[#D97706]/10 text-[#D97706] font-sans font-semibold uppercase tracking-wider px-2 py-0.5 rounded">Step 2</span>
-              <span className="text-xs font-serif font-medium text-[#1C1917]/50">Shop Details</span>
-              <div className="flex-grow h-[1px] bg-[#1C1917]/10"></div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="shopName" className="text-xs font-sans font-medium text-[#3C3937] uppercase tracking-wider">Shop / Business Name</label>
-              <input id="shopName" type="text" required value={shopName} onChange={(e) => setShopName(e.target.value)} placeholder="Rahul Kirana Store" className={inputCls} />
-            </div>
-
-            <button type="submit" disabled={loading} className="w-full bg-[#1C1917] text-[#F9F6EE] font-sans font-medium text-base py-4 px-6 rounded-xl flex justify-center items-center gap-2 cursor-pointer mt-4 hover:bg-[#2C2A29] transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
-              {loading ? <><svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg><span>Setting up your shop...</span></> : <span>Register & Setup Shop</span>}
-            </button>
-          </form>
-
-          <div className="mt-8 text-center pt-6 border-t border-[#1C1917]/5">
-            <p className="text-xs font-sans text-[#6C6967]">Already have an account?{" "}<Link href="/login" className="text-[#D97706] hover:underline font-medium ml-1">Log In</Link></p>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
-
