@@ -226,7 +226,7 @@ export default function LoginPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#1C1917]/50 via-transparent to-transparent" />
           </div>
 
-          <div className="login-form-enter w-full max-w-[420px] z-10">
+          <div className="login-form-enter w-full max-w-[560px] z-10">
             {/* Branding */}
             <div className="text-center mb-10">
               <Link href="/" className="inline-block group">
@@ -247,7 +247,7 @@ export default function LoginPage() {
             </div>
 
             {/* Login card */}
-            <div className="login-card-enter bg-white border border-[#1C1917]/8 shadow-xl rounded-2xl px-8 sm:px-10 py-10 relative overflow-hidden">
+            <div className="login-card-enter bg-white border border-[#1C1917]/8 shadow-xl rounded-2xl px-8 sm:px-12 py-[73px] relative overflow-hidden">
               {/* Amber accent line at top */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100px] h-[3px] bg-gradient-to-r from-[#D97706] via-[#D4AF37] to-[#D97706] rounded-b-full" />
 
@@ -274,8 +274,8 @@ export default function LoginPage() {
               )}
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-1.5">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="space-y-2">
                   <label
                     htmlFor="email"
                     className={`text-xs font-sans font-medium uppercase tracking-wider transition-colors duration-200 ${focusedField === 'email' ? 'text-[#D97706]' : 'text-[#3C3937]'
@@ -298,12 +298,12 @@ export default function LoginPage() {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="you@example.com"
-                      className="login-input-focus w-full bg-[#FBFBFA] border border-[#1C1917]/12 rounded-xl pl-11 pr-4 py-3.5 text-sm text-[#1C1917] placeholder-[#1C1917]/25 outline-none"
+                      className="login-input-focus w-full bg-[#FBFBFA] border border-[#1C1917]/15 rounded-xl pl-12 pr-6 py-4 text-base text-[#1C1917] placeholder-[#1C1917]/30 outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label
                     htmlFor="password"
                     className={`text-xs font-sans font-medium uppercase tracking-wider transition-colors duration-200 ${focusedField === 'password' ? 'text-[#D97706]' : 'text-[#3C3937]'
@@ -326,7 +326,7 @@ export default function LoginPage() {
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="••••••••"
-                      className="login-input-focus w-full bg-[#FBFBFA] border border-[#1C1917]/12 rounded-xl pl-11 pr-4 py-3.5 text-sm text-[#1C1917] placeholder-[#1C1917]/25 outline-none"
+                      className="login-input-focus w-full bg-[#FBFBFA] border border-[#1C1917]/15 rounded-xl pl-12 pr-6 py-4 text-base text-[#1C1917] placeholder-[#1C1917]/30 outline-none"
                     />
                   </div>
                 </div>
@@ -335,11 +335,11 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="login-btn-hover w-full bg-[#1C1917] text-[#F9F6EE] font-sans font-semibold text-sm py-3.5 px-4 rounded-xl flex justify-center items-center gap-2.5 cursor-pointer mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="login-btn-hover w-full bg-[#1C1917] text-[#F9F6EE] font-sans font-semibold text-base py-4 px-6 rounded-xl flex justify-center items-center gap-2.5 cursor-pointer mt-4 hover:bg-[#2C2A29] transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
-                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
