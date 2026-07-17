@@ -55,7 +55,7 @@ apps/web/public/sw.js
 apps/web/public/workbox-*.js
 apps/web/public/swe-worker-*.js
 
-.agents/*
+.agents
 
 reference/*
 AGENTS.md
