@@ -1,0 +1,12 @@
+{
+  "name": "@hisab-kitab/shared",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
