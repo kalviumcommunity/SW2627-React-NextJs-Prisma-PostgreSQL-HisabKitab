@@ -32,7 +32,7 @@ export const createTransactionSchema = z.object({
 // Contacts
 export const createContactSchema = z.object({
   name: z.string().min(1, { message: "Contact name is required" }).max(100).trim(),
-  phone: z.string().regex(/^\+?[0-9\s\-]{7,15}$/, { message: "Invalid phone number" }).optional().nullable(),
+  phone: z.string().regex(/^\+?[0-9\s-]{7,15}$/, { message: "Invalid phone number" }).optional().nullable(),
   email: z.string().email({ message: "Invalid email address" }).optional().nullable(),
   openingBalance: z.coerce.number().optional().default(0),
 });

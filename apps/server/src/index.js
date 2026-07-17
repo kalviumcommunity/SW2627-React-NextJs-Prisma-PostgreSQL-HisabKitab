@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { db } from '@hisab-kitab/database';
 import { loginSchema } from '@hisab-kitab/shared';
 
 dotenv.config();
