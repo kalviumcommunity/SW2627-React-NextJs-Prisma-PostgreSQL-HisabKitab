@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { motion, useMotionValue, useTransform, MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 
 const FEATURES = [
   {
@@ -64,148 +64,36 @@ const FEATURES = [
 export default function FeaturesSection() {
   const containerRef = useRef<HTMLElement>(null);
   
-  // Custom progress driven by wheel events instead of page scroll
-  const progress = useMotionValue(0);
-  const wheelAccum = useRef(0);
-  const totalTravel = FEATURES.length * 600; // Total manual scroll travel needed
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    let isLocked = false;
-    let ticking = false;
-
-    const lockScroll = () => {
-      isLocked = true;
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      el.scrollIntoView({ behavior: 'auto' });
-    };
-
-    const unlockScroll = (direction: 'up' | 'down') => {
-      isLocked = false;
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-      // Push slightly past the lock boundary to prevent instant re-locking
-      if (direction === 'down') {
-         window.scrollBy(0, 20);
-      } else {
-         window.scrollBy(0, -20);
-      }
-    };
-
-    const handleInput = (deltaY: number, preventDefaultFn: () => void) => {
-      if (isLocked) {
-        preventDefaultFn();
-        
-        // Accumulate progress
-        const delta = Math.abs(deltaY) > 100 ? deltaY * 0.4 : deltaY;
-        const newAccum = wheelAccum.current + delta;
-        
-        if (newAccum <= 0) {
-          wheelAccum.current = 0;
-          progress.set(0);
-          unlockScroll('up');
-        } else if (newAccum >= totalTravel) {
-          wheelAccum.current = totalTravel;
-          progress.set(1);
-          unlockScroll('down');
-        } else {
-          wheelAccum.current = newAccum;
-          progress.set(newAccum / totalTravel);
-        }
-      } else {
-        // Predictive lock for smooth entry (before native scroll takes over)
-        const rect = el.getBoundingClientRect();
-        const currentProgress = progress.get();
-        const nextTop = rect.top - deltaY;
-        
-        if (deltaY > 0 && rect.top > -50 && nextTop <= 0 && currentProgress === 0) {
-           preventDefaultFn();
-           lockScroll();
-        }
-        else if (deltaY < 0 && rect.bottom < window.innerHeight + 50 && (rect.bottom - deltaY) >= window.innerHeight && currentProgress === 1) {
-           preventDefaultFn();
-           lockScroll();
-        }
-      }
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      handleInput(e.deltaY, () => e.preventDefault());
-    };
-
-    let touchStartY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-       touchStartY = e.touches[0].clientY;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-       const touchY = e.touches[0].clientY;
-       const deltaY = touchStartY - touchY; 
-       handleInput(deltaY * 2, () => e.preventDefault()); // Multiply for touch speed
-       if (isLocked) {
-         touchStartY = touchY;
-       }
-    };
-
-    // Fallback for momentum scrolling (e.g. fast swipe on mobile/mac)
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (isLocked) {
-             // Force lock if native scroll somehow escaped
-             el.scrollIntoView({ behavior: 'auto' });
-          } else {
-             const rect = el.getBoundingClientRect();
-             const currentProgress = progress.get();
-             // Lock if boundary crossed natively
-             if (rect.top <= 2 && rect.top > -100 && currentProgress === 0) {
-                lockScroll();
-             } else if (rect.bottom >= window.innerHeight - 2 && rect.bottom < window.innerHeight + 100 && currentProgress === 1) {
-                lockScroll();
-             }
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('scroll', onScroll);
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    };
-  }, [progress, totalTravel]);
+  const { scrollYProgress: progress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
 
   return (
     <section
       ref={containerRef}
       id="features"
       style={{
-        // 100vh height to freeze native scrollbar
-        height: '100vh',
-        fontFamily: 'var(--font-inter), system-ui, sans-serif',
-        backgroundColor: '#F9F6EE',
+        height: `${FEATURES.length * 80}vh`,
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        padding: '24px',
+        backgroundColor: '#F9F6EE',
       }}
     >
-      <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div 
+        style={{
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          fontFamily: 'var(--font-inter), system-ui, sans-serif',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          padding: '24px',
+        }}
+      >
+        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         
         {/* Section Heading - Static while scrolling */}
         <div
@@ -264,6 +152,7 @@ export default function FeaturesSection() {
               progress={progress}
             />
           ))}
+        </div>
         </div>
       </div>
     </section>
