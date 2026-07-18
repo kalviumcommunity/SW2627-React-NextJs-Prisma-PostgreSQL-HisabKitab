@@ -15,6 +15,7 @@ import {
   Trash2
 } from "lucide-react";
 import styles from "./Transactions.module.css";
+import TransactionModal from "./TransactionModal";
 
 // Animation Variants
 const containerVariants = {
@@ -31,7 +32,7 @@ const itemVariants = {
 };
 
 // Mock Data
-const mockTransactions = [
+const initialMockTransactions = [
   {
     id: "tx1",
     contactName: "Ramesh Trading Co.",
@@ -79,10 +80,12 @@ const mockTransactions = [
   },
 ];
 
-export default function TransactionsPage() {
+export default function AnalyticsPage() {
   const { status } = useSession();
   const router = useRouter();
   const [filter, setFilter] = useState("ALL");
+  const [transactions, setTransactions] = useState(initialMockTransactions);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -94,28 +97,35 @@ export default function TransactionsPage() {
     return <div style={{ minHeight: "100vh", backgroundColor: "#f9f6ee" }} />;
   }
 
-  const filteredTransactions = mockTransactions.filter(tx => {
+  const filteredTransactions = transactions.filter(tx => {
     if (filter === "ALL") return true;
     return tx.type === filter;
   });
 
   return (
-    <motion.div
-      className={styles.container}
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <>
+      <motion.div
+        className={styles.container}
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        style={{ 
+          filter: isModalOpen ? "blur(8px)" : "none", 
+          transition: "filter 0.3s ease",
+          pointerEvents: isModalOpen ? "none" : "auto"
+        }}
+      >
       {/* HEADER */}
       <motion.div className={styles.header} variants={itemVariants}>
         <div className={styles.headerText}>
-          <h2 className={styles.title}>Transactions</h2>
-          <p className={styles.subtitle}>Ledger of all money given and received</p>
+          <h2 className={styles.title}>Analytics</h2>
+          <p className={styles.subtitle}>Insights into all your money given and received</p>
         </div>
         <motion.button
           className={styles.primaryBtn}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setIsModalOpen(true)}
         >
           <Plus size={18} />
           <span>New Transaction</span>
@@ -247,6 +257,14 @@ export default function TransactionsPage() {
           )}
         </div>
       </motion.section>
-    </motion.div>
+      </motion.div>
+
+      {/* MODAL */}
+      <TransactionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onAddTransaction={(newTx) => setTransactions([newTx, ...transactions])}
+      />
+    </>
   );
 }

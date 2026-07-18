@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Mail, Lock, ShieldCheck, LockKeyhole, EyeOff } from "lucide-react";
+import { Mail, Lock, ShieldCheck, LockKeyhole, EyeOff, ArrowLeft } from "lucide-react";
 import styles from "./Login.module.css";
 
 export default function LoginPage() {
@@ -90,6 +90,12 @@ export default function LoginPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
         >
+          {/* Back to Home Link */}
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={16} />
+            <span>Back to Home</span>
+          </Link>
+
           {/* Branding */}
           <div className={styles.branding}>
             <Link href="/" className={styles.brandingTitle}>
@@ -119,18 +125,16 @@ export default function LoginPage() {
               <div className={styles.formGroup}>
                 <label
                   htmlFor="email"
-                  className={`${styles.label} ${
-                    focusedField === "email" ? styles.labelFocused : ""
-                  }`}
+                  className={`${styles.label} ${focusedField === "email" ? styles.labelFocused : ""
+                    }`}
                 >
                   Email Address
                 </label>
                 <div className={styles.inputWrapper}>
                   <Mail
                     size={20}
-                    className={`${styles.inputIcon} ${
-                      focusedField === "email" ? styles.inputIconFocused : ""
-                    }`}
+                    className={`${styles.inputIcon} ${focusedField === "email" ? styles.inputIconFocused : ""
+                      }`}
                   />
                   <input
                     id="email"
@@ -149,18 +153,16 @@ export default function LoginPage() {
               <div className={styles.formGroup}>
                 <label
                   htmlFor="password"
-                  className={`${styles.label} ${
-                    focusedField === "password" ? styles.labelFocused : ""
-                  }`}
+                  className={`${styles.label} ${focusedField === "password" ? styles.labelFocused : ""
+                    }`}
                 >
                   Password
                 </label>
                 <div className={styles.inputWrapper}>
                   <Lock
                     size={20}
-                    className={`${styles.inputIcon} ${
-                      focusedField === "password" ? styles.inputIconFocused : ""
-                    }`}
+                    className={`${styles.inputIcon} ${focusedField === "password" ? styles.inputIconFocused : ""
+                      }`}
                   />
                   <input
                     id="password"

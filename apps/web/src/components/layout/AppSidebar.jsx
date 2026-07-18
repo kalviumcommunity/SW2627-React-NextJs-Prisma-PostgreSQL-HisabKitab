@@ -9,13 +9,16 @@ import {
   Package,
   Settings,
   ChevronLeft,
+  PieChart,
+  BookOpen
 } from "lucide-react";
 import styles from "./AppSidebar.module.css";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Ledger", href: "/ledger", icon: BookOpen },
   { name: "Workers", href: "/workers", icon: Users },
-  { name: "Transactions", href: "/transactions", icon: ArrowRightLeft },
+  { name: "Analytics", href: "/analytics", icon: PieChart },
   { name: "Inventory", href: "/inventory", icon: Package },
 ];
 

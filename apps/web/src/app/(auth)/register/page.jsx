@@ -108,6 +108,12 @@ export default function RegisterPage() {
         </div>
 
         <div className={styles.formContainer}>
+          {/* Back to Home Link */}
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={16} />
+            <span>Back to Home</span>
+          </Link>
+
           {/* Branding */}
           <div className={styles.branding}>
             <Link href="/" className={styles.brandingTitle}>
@@ -155,18 +161,16 @@ export default function RegisterPage() {
                     <div className={styles.formGroup}>
                       <label
                         htmlFor="name"
-                        className={`${styles.label} ${
-                          focusedField === "name" ? styles.labelFocused : ""
-                        }`}
+                        className={`${styles.label} ${focusedField === "name" ? styles.labelFocused : ""
+                          }`}
                       >
                         Full Name
                       </label>
                       <div className={styles.inputWrapper}>
                         <User
                           size={20}
-                          className={`${styles.inputIcon} ${
-                            focusedField === "name" ? styles.inputIconFocused : ""
-                          }`}
+                          className={`${styles.inputIcon} ${focusedField === "name" ? styles.inputIconFocused : ""
+                            }`}
                         />
                         <input
                           id="name"
@@ -185,18 +189,16 @@ export default function RegisterPage() {
                     <div className={styles.formGroup}>
                       <label
                         htmlFor="email"
-                        className={`${styles.label} ${
-                          focusedField === "email" ? styles.labelFocused : ""
-                        }`}
+                        className={`${styles.label} ${focusedField === "email" ? styles.labelFocused : ""
+                          }`}
                       >
                         Email
                       </label>
                       <div className={styles.inputWrapper}>
                         <Mail
                           size={20}
-                          className={`${styles.inputIcon} ${
-                            focusedField === "email" ? styles.inputIconFocused : ""
-                          }`}
+                          className={`${styles.inputIcon} ${focusedField === "email" ? styles.inputIconFocused : ""
+                            }`}
                         />
                         <input
                           id="email"
@@ -216,18 +218,16 @@ export default function RegisterPage() {
                   <div className={styles.formGroup}>
                     <label
                       htmlFor="password"
-                      className={`${styles.label} ${
-                        focusedField === "password" ? styles.labelFocused : ""
-                      }`}
+                      className={`${styles.label} ${focusedField === "password" ? styles.labelFocused : ""
+                        }`}
                     >
                       Password
                     </label>
                     <div className={styles.inputWrapper}>
                       <Lock
                         size={20}
-                        className={`${styles.inputIcon} ${
-                          focusedField === "password" ? styles.inputIconFocused : ""
-                        }`}
+                        className={`${styles.inputIcon} ${focusedField === "password" ? styles.inputIconFocused : ""
+                          }`}
                       />
                       <input
                         id="password"
@@ -266,18 +266,16 @@ export default function RegisterPage() {
                   <div className={styles.formGroup}>
                     <label
                       htmlFor="shopName"
-                      className={`${styles.label} ${
-                        focusedField === "shopName" ? styles.labelFocused : ""
-                      }`}
+                      className={`${styles.label} ${focusedField === "shopName" ? styles.labelFocused : ""
+                        }`}
                     >
                       Shop / Business Name
                     </label>
                     <div className={styles.inputWrapper}>
                       <Store
                         size={20}
-                        className={`${styles.inputIcon} ${
-                          focusedField === "shopName" ? styles.inputIconFocused : ""
-                        }`}
+                        className={`${styles.inputIcon} ${focusedField === "shopName" ? styles.inputIconFocused : ""
+                          }`}
                       />
                       <input
                         id="shopName"
