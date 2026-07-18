@@ -6,6 +6,9 @@
   "exports": {
     ".": "./src/index.js"
   },
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
   "dependencies": {
     "@prisma/client": "^5.14.0"
   },
