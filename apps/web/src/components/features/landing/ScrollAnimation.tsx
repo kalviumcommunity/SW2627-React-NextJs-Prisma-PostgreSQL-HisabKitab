@@ -144,20 +144,53 @@ export default function ScrollAnimation({
       }
     }
 
-    // Lock scroll
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    e.locked = true;
+    const shouldSkip = sessionStorage.getItem('hasSeenLandingAnim') === 'true';
+    if (!shouldSkip) {
+      sessionStorage.setItem('hasSeenLandingAnim', 'true');
+    }
 
-    // Load first frame
-    const img1 = new Image();
-    img1.onload = () => {
-      e.cache.set(startFrame, img1);
-      drawFrame(startFrame);
-      setReady(true);
-      preloadAround(startFrame);
-    };
-    img1.src = getFrameUrl(startFrame);
+    if (shouldSkip) {
+      e.currentFrame = endFrame;
+      e.targetFrame = endFrame;
+      e.completed = true;
+      e.locked = false;
+      e.zooming = false;
+      e.wheelAccum = totalWheelTravel;
+      e.zoomAccum = zoomWheelTravel;
+      
+      applyZoom(1);
+      
+      if (stickyAfterComplete) {
+        setPhase('released');
+      }
+
+      cbRef.current.onProgress?.(1);
+      cbRef.current.onComplete?.();
+
+      const img = new Image();
+      img.onload = () => {
+        e.cache.set(endFrame, img);
+        drawFrame(endFrame);
+        setReady(true);
+        preloadAround(endFrame);
+      };
+      img.src = getFrameUrl(endFrame);
+    } else {
+      // Lock scroll
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      e.locked = true;
+
+      // Load first frame
+      const img1 = new Image();
+      img1.onload = () => {
+        e.cache.set(startFrame, img1);
+        drawFrame(startFrame);
+        setReady(true);
+        preloadAround(startFrame);
+      };
+      img1.src = getFrameUrl(startFrame);
+    }
 
     // Render loop
     function tick() {
