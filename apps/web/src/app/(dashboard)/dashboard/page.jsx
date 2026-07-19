@@ -4,18 +4,20 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen } from "lucide-react";
-import styles from "./Dashboard.module.css";
+import { User, Calendar } from "lucide-react";
 
-// Animation Variants
+import TotalBalanceCard from "@/components/dashboard/TotalBalanceCard";
+import KpiGrid from "@/components/dashboard/KpiGrid";
+import ActionCards from "@/components/dashboard/ActionCards";
+import CurrenciesMarket from "@/components/dashboard/CurrenciesMarket";
+import TopSpending from "@/components/dashboard/TopSpending";
+import BalanceChart from "@/components/dashboard/BalanceChart";
+
 const containerVariants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
@@ -36,77 +38,74 @@ export default function DashboardPage() {
 
   if (status === "loading") {
     return (
-      <div className={styles.loader}>
-        <div className={styles.spinner}></div>
-        <p className={styles.loadingText}>Loading Ledger</p>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+        <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold">Loading Dashboard</p>
       </div>
     );
   }
 
-  const kpiData = [
-    { label: "Total Dues", value: "0.00", color: "#10B981", sub: "Receivable from 0 workers" },
-    { label: "Total Payable", value: "0.00", color: "#EF4444", sub: "Owed to 0 vendors" },
-    { label: "Salary Payable", value: "0.00", color: "#3B82F6", sub: "For 0 workers" },
-    { label: "Monthly Loss", value: "0.00", color: "#D97706", sub: "Expiries & damages" },
-  ];
-
   return (
     <motion.div
-      className={styles.dashboard}
+      className="flex flex-col gap-6 pb-12 w-full max-w-7xl mx-auto"
       variants={containerVariants}
       initial="hidden"
       animate="show"
     >
-      <motion.div className={styles.header} variants={itemVariants}>
-        <h2 className={styles.title}>Overview</h2>
-        <p className={styles.subtitle}>Real-time shop balances and financial summaries</p>
+      {/* Header Area */}
+      <motion.div className="flex justify-between items-end mb-4" variants={itemVariants}>
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Financial Overview</h1>
+          <p className="text-gray-500 mt-1">A real-time snapshot of your financial health.</p>
+        </div>
+        
+        <div className="flex gap-4 items-center">
+          <button className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+            <User size={16} className="text-gray-400" />
+            Personal
+          </button>
+          
+          <button className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+            <Calendar size={16} className="text-gray-400" />
+            January 12, 2026 - January 31, 2026
+          </button>
+        </div>
       </motion.div>
 
-      <motion.section className={styles.kpiGrid} variants={containerVariants}>
-        {kpiData.map((card, idx) => (
-          <motion.div
-            key={idx}
-            className={styles.kpiCard}
-            variants={itemVariants}
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          >
-            <div className={styles.cardAccent} style={{ backgroundColor: card.color }}></div>
-            <span className={styles.cardLabel}>{card.label}</span>
-            <span className={styles.cardValue} style={{ color: card.color }}>
-              ₹{card.value}
-            </span>
-            <span className={styles.cardSub}>{card.sub}</span>
-          </motion.div>
-        ))}
-      </motion.section>
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column (3 spans on lg) */}
+        <motion.div className="lg:col-span-3 flex flex-col gap-6" variants={itemVariants}>
+          <TotalBalanceCard />
+          <CurrenciesMarket />
+          <TopSpending />
+        </motion.div>
 
-      <motion.section className={styles.emptyState} variants={itemVariants}>
-        <div className={styles.emptyIcon}>
-          <BookOpen size={32} />
+        {/* Middle and Right Columns Container (9 spans on lg) */}
+        <div className="lg:col-span-9 flex flex-col gap-6">
+          
+          {/* Top Row of Middle/Right */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* KPI Grid (takes 2 spans) */}
+            <motion.div className="lg:col-span-2" variants={itemVariants}>
+              <KpiGrid />
+            </motion.div>
+            
+            {/* Action Cards (takes 1 span) */}
+            <motion.div className="lg:col-span-1" variants={itemVariants}>
+              <ActionCards />
+            </motion.div>
+          </div>
+
+          {/* Bottom Row of Middle/Right */}
+          <motion.div className="flex-1 min-h-[300px]" variants={itemVariants}>
+            <BalanceChart />
+          </motion.div>
+          
         </div>
-        <h3 className={styles.emptyTitle}>Your digital khatabook is empty</h3>
-        <p className={styles.emptyDesc}>
-          Get started by adding your first worker or importing your existing paper ledgers using our AI vision tool.
-        </p>
-        <div className={styles.actionGroup}>
-          <motion.button
-            className={styles.primaryBtn}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Add First Worker
-          </motion.button>
-          <motion.button
-            className={styles.secondaryBtn}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Import from Paper Khata
-          </motion.button>
-        </div>
-      </motion.section>
+        
+      </div>
     </motion.div>
   );
 }
