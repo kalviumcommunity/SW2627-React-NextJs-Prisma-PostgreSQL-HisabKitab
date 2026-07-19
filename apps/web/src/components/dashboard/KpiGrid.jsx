@@ -2,10 +2,10 @@ import { Wallet, ArrowDownCircle, ArrowUpCircle, Banknote, PiggyBank } from "luc
 
 export default function KpiGrid() {
   return (
-    <div className="grid grid-cols-2 gap-6 h-full">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-10">
       {/* Income Card */}
-      <div className="bg-white hover:bg-blue-600 rounded-[32px] p-9 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[200px]">
-        <div className="flex flex-row items-center justify-center gap-[17px] mb-[42px]">
+      <div className="bg-white hover:bg-blue-600 h-45 rounded-[32px] p-6 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[160px] gap-2">
+        <div className="flex flex-row items-center justify-center gap-3 p-20">
           <div className="w-11 h-11 rounded-full bg-gray-50 group-hover:bg-white/20 flex items-center justify-center transition-colors duration-300">
             <Wallet size={22} className="text-gray-600 group-hover:text-white transition-colors duration-300" />
           </div>
@@ -21,8 +21,8 @@ export default function KpiGrid() {
       </div>
 
       {/* Expenses Card */}
-      <div className="bg-white hover:bg-blue-600 rounded-[32px] p-9 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[200px]">
-        <div className="flex flex-row items-center justify-center gap-[17px] mb-[42px]">
+      <div className="bg-white h-45 hover:bg-blue-600 rounded-[32px] p-6 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[160px] gap-2">
+        <div className="flex flex-row items-center justify-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-full bg-gray-50 group-hover:bg-white/20 flex items-center justify-center transition-colors duration-300">
             <Banknote size={22} className="text-gray-600 group-hover:text-white transition-colors duration-300" />
           </div>
@@ -38,8 +38,8 @@ export default function KpiGrid() {
       </div>
 
       {/* Net Card */}
-      <div className="bg-white hover:bg-blue-600 rounded-[32px] p-9 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[200px]">
-        <div className="flex flex-row items-center justify-center gap-[17px] mb-[42px]">
+      <div className="bg-white h-45 hover:bg-blue-600 rounded-[32px] p-6 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[160px] gap-2">
+        <div className="flex flex-row items-center justify-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-full bg-gray-50 group-hover:bg-white/20 flex items-center justify-center transition-colors duration-300">
             <ArrowUpCircle size={22} className="text-gray-600 group-hover:text-white transition-colors duration-300" />
           </div>
@@ -52,8 +52,8 @@ export default function KpiGrid() {
       </div>
 
       {/* Savings Card */}
-      <div className="bg-white hover:bg-blue-600 rounded-[32px] p-9 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[200px]">
-        <div className="flex flex-row items-center justify-center gap-[17px] mb-[42px]">
+      <div className="bg-white h-45 hover:bg-blue-600 rounded-[32px] p-6 border border-gray-100 hover:border-blue-600 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-600/30 cursor-pointer group min-h-[160px] gap-2">
+        <div className="flex flex-row items-center justify-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-full bg-gray-50 group-hover:bg-white/20 flex items-center justify-center transition-colors duration-300">
             <PiggyBank size={22} className="text-gray-600 group-hover:text-white transition-colors duration-300" />
           </div>

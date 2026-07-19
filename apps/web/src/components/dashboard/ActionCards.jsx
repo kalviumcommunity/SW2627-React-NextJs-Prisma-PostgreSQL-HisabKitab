@@ -6,7 +6,7 @@ export default function ActionCards() {
     <div className="flex flex-col gap-6 h-full">
       {/* Add Personal Note */}
       <div className={`${styles.card} min-h-[260px] group`}>
-        <div className="flex flex-col justify-center items-center gap-6 z-10 relative w-full pt-8">
+        <div className="flex flex-col justify-center items-center gap-3 z-10 relative w-full pt-8">
           <button className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 active:scale-95 bg-white group-hover:shadow-sm ">
             <Plus size={24} className="text-gray-600 group-hover:text-blue-600 transition-colors" />
           </button>
