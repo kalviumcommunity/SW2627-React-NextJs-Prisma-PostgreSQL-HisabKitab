@@ -45,7 +45,7 @@ export async function getDashboardData() {
 
     // 3. Recent Notes
     const recentTransactionsWithNotes = await db.transaction.findMany({
-      where: { shopId, isDeleted: false, note: { not: null, not: "" } },
+      where: { shopId, isDeleted: false, AND: [{ note: { not: null } }, { note: { not: "" } }] },
       orderBy: { createdAt: "desc" },
       take: 4,
       include: { contact: { select: { name: true } } }
