@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { ArrowUpRight, User } from "lucide-react";
 import styles from "./CurrenciesMarket.module.css";
 
@@ -18,7 +19,14 @@ export default function CurrenciesMarket({ topDebtors = [] }) {
           <p className="text-sm text-gray-400 text-center py-4">No debtors found.</p>
         ) : (
           topDebtors.map((contact, idx) => (
-            <div key={contact.id || idx} className="flex items-center justify-between">
+            <motion.div 
+              key={contact.id || idx} 
+              className="flex items-center justify-between"
+              initial={{ opacity: 0, scale: 0.8, y: 50, filter: 'blur(10px)' }}
+              whileInView={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-sm">
                   {contact.name.charAt(0).toUpperCase()}
@@ -32,7 +40,7 @@ export default function CurrenciesMarket({ topDebtors = [] }) {
               <div className="flex items-center gap-6 text-sm font-medium">
                 <div className="text-green-600 font-bold w-16 text-right tracking-tight">{formatCurrency(contact.balance)}</div>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>

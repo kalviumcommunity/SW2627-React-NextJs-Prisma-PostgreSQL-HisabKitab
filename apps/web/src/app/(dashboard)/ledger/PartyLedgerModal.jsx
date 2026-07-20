@@ -117,7 +117,14 @@ export default function PartyLedgerModal({ isOpen, onClose, party }) {
                   <div className={styles.dateHeader}>{date}</div>
                   <div className={styles.transactionList}>
                     {groupedTransactions[date].map(tx => (
-                      <div key={tx.id} className={styles.txCard}>
+                      <motion.div 
+                        key={tx.id} 
+                        className={styles.txCard}
+                        initial={{ opacity: 0, scale: 0.8, y: 50, filter: 'blur(10px)' }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                        viewport={{ once: false, amount: 0.2 }}
+                        transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
+                      >
                         <div className={styles.txInfo}>
                           <div className={`${styles.txIcon} ${tx.type === 'YOU_GOT' ? styles.txIconGot : styles.txIconGave}`}>
                             {tx.type === 'YOU_GOT' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
@@ -138,7 +145,7 @@ export default function PartyLedgerModal({ isOpen, onClose, party }) {
                         <span className={`${styles.txAmount} ${tx.type === 'YOU_GOT' ? styles.amountCollect : styles.amountGive}`}>
                           ₹ {tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>

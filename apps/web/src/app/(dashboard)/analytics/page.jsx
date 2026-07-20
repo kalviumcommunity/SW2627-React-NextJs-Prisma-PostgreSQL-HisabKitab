@@ -200,10 +200,11 @@ export default function AnalyticsPage() {
                 key={tx.id}
                 className={styles.row}
                 layout
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                initial={{ opacity: 0, scale: 0.8, y: 50, filter: 'blur(10px)' }}
+                whileInView={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
               >
                 <div className={styles.contactGroup}>
                   <div className={`${styles.typeIcon} ${tx.type === "YOU_GAVE" ? styles.typeIconGave : styles.typeIconGot}`}>

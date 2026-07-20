@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
 import styles from "./Ledger.module.css";
 import PartyLedgerModal from "./PartyLedgerModal";
+import AddPartyModal from "./AddPartyModal";
 
 // Animation Variants
 const containerVariants = {
@@ -61,6 +62,12 @@ export default function LedgerPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("COLLECT"); // COLLECT or GIVE
   const [activeParty, setActiveParty] = useState(null);
+  const [isAddPartyModalOpen, setIsAddPartyModalOpen] = useState(false);
+  const [parties, setParties] = useState(mockLedgerData);
+
+  const handleAddParty = (newParty) => {
+    setParties([newParty, ...parties]);
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -72,8 +79,8 @@ export default function LedgerPage() {
     return <div style={{ minHeight: "100vh", backgroundColor: "#f9f6ee" }} />;
   }
 
-  const toCollectList = mockLedgerData.filter(item => item.netBalance > 0);
-  const toGiveList = mockLedgerData.filter(item => item.netBalance < 0);
+  const toCollectList = parties.filter(item => item.netBalance > 0);
+  const toGiveList = parties.filter(item => item.netBalance < 0);
 
   const totalToCollect = toCollectList.reduce((acc, curr) => acc + curr.netBalance, 0);
   const totalToGive = toGiveList.reduce((acc, curr) => acc + Math.abs(curr.netBalance), 0);
@@ -88,9 +95,9 @@ export default function LedgerPage() {
         initial="hidden"
         animate="show"
         style={{ 
-          filter: activeParty ? "blur(8px)" : "none", 
+          filter: (activeParty || isAddPartyModalOpen) ? "blur(8px)" : "none", 
           transition: "filter 0.3s ease",
-          pointerEvents: activeParty ? "none" : "auto"
+          pointerEvents: (activeParty || isAddPartyModalOpen) ? "none" : "auto"
         }}
       >
       {/* HEADER */}
@@ -103,6 +110,7 @@ export default function LedgerPage() {
           className={styles.primaryBtn}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setIsAddPartyModalOpen(true)}
         >
           <Plus size={18} />
           <span>Add Party</span>
@@ -181,10 +189,11 @@ export default function LedgerPage() {
             <motion.div
               key={item.id}
               layout
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              initial={{ opacity: 0, scale: 0.8, y: 50, filter: 'blur(10px)' }}
+              whileInView={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
               className={styles.row}
               onClick={() => setActiveParty(item)}
             >
@@ -228,6 +237,12 @@ export default function LedgerPage() {
         isOpen={!!activeParty} 
         onClose={() => setActiveParty(null)} 
         party={activeParty} 
+      />
+
+      <AddPartyModal 
+        isOpen={isAddPartyModalOpen} 
+        onClose={() => setIsAddPartyModalOpen(false)} 
+        onAddParty={handleAddParty} 
       />
     </>
   );
