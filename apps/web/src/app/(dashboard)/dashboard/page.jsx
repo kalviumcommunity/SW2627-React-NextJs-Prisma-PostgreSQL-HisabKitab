@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { User, Calendar } from "lucide-react";
 
@@ -12,6 +12,7 @@ import ActionCards from "@/components/dashboard/ActionCards";
 import CurrenciesMarket from "@/components/dashboard/CurrenciesMarket";
 import TopSpending from "@/components/dashboard/TopSpending";
 import BalanceChart from "@/components/dashboard/BalanceChart";
+import { getDashboardData } from "./actions";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,14 +30,25 @@ const itemVariants = {
 export default function DashboardPage() {
   const { status } = useSession();
   const router = useRouter();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
+    } else if (status === "authenticated") {
+      getDashboardData().then((res) => {
+        if (res.success) {
+          setDashboardData(res.data);
+        } else {
+          console.error("Dashboard fetch error:", res.error);
+        }
+        setDataLoading(false);
+      });
     }
   }, [status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || dataLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
@@ -73,28 +85,32 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         
-        {/* Left Column (3 spans on lg) */}
-        <motion.div className="lg:col-span-3 flex flex-col gap-6" variants={itemVariants}>
-          <TotalBalanceCard />
-          <CurrenciesMarket />
-          <TopSpending />
+        {/* Left Column (4 spans on lg) */}
+        <motion.div className="lg:col-span-4 flex flex-col gap-4" variants={itemVariants}>
+          <TotalBalanceCard balance={dashboardData?.totalBalance || 0} />
+          <CurrenciesMarket topDebtors={dashboardData?.topDebtors || []} />
+          <TopSpending topCreditors={dashboardData?.topCreditors || []} />
         </motion.div>
 
-        {/* Middle and Right Columns Container (9 spans on lg) */}
-        <div className="lg:col-span-9 flex flex-col gap-6">
+        {/* Middle and Right Columns Container (8 spans on lg) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
           
           {/* Top Row of Middle/Right */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* KPI Grid (takes 2 spans) */}
             <motion.div className="lg:col-span-2" variants={itemVariants}>
-              <KpiGrid />
+              <KpiGrid 
+                totalGiven={dashboardData?.totalGiven || 0}
+                totalReceived={dashboardData?.totalReceived || 0}
+                totalContacts={dashboardData?.totalContacts || 0}
+              />
             </motion.div>
             
             {/* Action Cards (takes 1 span) */}
             <motion.div className="lg:col-span-1" variants={itemVariants}>
-              <ActionCards />
+              <ActionCards recentNotes={dashboardData?.recentNotes || []} />
             </motion.div>
           </div>
 

@@ -1,7 +1,13 @@
 import { Wallet, ChevronDown, ArrowUpRight, Plus } from "lucide-react";
 import styles from "./TotalBalanceCard.module.css";
 
-export default function TotalBalanceCard() {
+export default function TotalBalanceCard({ balance = 0 }) {
+  // Format the balance properly
+  const formattedBalance = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(balance);
+
   return (
     <div className={`${styles.premiumCard} ${styles.totalBalanceCard}`}>
       
@@ -29,7 +35,7 @@ export default function TotalBalanceCard() {
         {/* Amount Section */}
         <div className={styles.amountSection}>
           <h2 className={styles.amountTitle}>
-            $128,450<span className={styles.amountCents}>.75</span>
+            {formattedBalance}
           </h2>
           <div className={styles.trendContainer}>
             <span className={styles.trendBadge}>+15.2%</span>

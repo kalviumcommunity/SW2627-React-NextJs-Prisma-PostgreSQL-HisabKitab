@@ -22,8 +22,9 @@
 
 /* Total Balance Specific Styles */
 .totalBalanceCard {
-  min-height: 550px;
+  min-height: 480px;
   height: 100%;
+  width: calc(100% - 10px);
 }
 
 .glowBackground {
@@ -136,7 +137,7 @@
 }
 
 .amountTitle {
-  font-size: 4rem; /* 64px */
+  font-size: 3rem; /* 48px */
   font-weight: 900;
   color: #111827; /* gray-900 */
   letter-spacing: -0.05em;
@@ -145,11 +146,11 @@
 }
 
 .premiumCard:hover .amountTitle {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .amountCents {
-  font-size: 2.25rem;
+  font-size: 1.75rem;
   color: #d1d5db; /* gray-300 */
   font-weight: 700;
 }
