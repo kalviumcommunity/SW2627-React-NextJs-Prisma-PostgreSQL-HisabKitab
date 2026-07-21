@@ -17,6 +17,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
+  // Map raw next-auth error strings to user-friendly messages
+  const sanitizeError = (rawError) => {
+    const safeMessages = {
+      "Invalid email or password.": "Invalid email or password.",
+      "Please enter both email and password.": "Please enter both email and password.",
+      "Something went wrong. Please try again later.": "Something went wrong. Please try again later.",
+    };
+    // Return the known safe message, or a generic fallback for any unexpected error
+    return safeMessages[rawError] || "Unable to sign in. Please check your credentials and try again.";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -25,7 +36,7 @@ export default function LoginPage() {
     try {
       const res = await signIn("credentials", { redirect: false, email, password });
       if (res?.error) {
-        setError(res.error || "Invalid email or password.");
+        setError(sanitizeError(res.error));
         setLoading(false);
       } else {
         router.push("/dashboard");

@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FEATURES = [
   {
@@ -61,47 +61,144 @@ const FEATURES = [
   },
 ];
 
+// Wheel delta threshold to trigger the next card
+const WHEEL_THRESHOLD = 250;
+
 export default function FeaturesSection() {
-  const containerRef = useRef<HTMLElement>(null);
-  
-  const { scrollYProgress: progress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [revealedCount, setRevealedCount] = useState(1);
+  const [isComplete, setIsComplete] = useState(false);
+  const wheelAccumulator = useRef(0);
+
+
+  // Detect when section enters viewport and lock scroll
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const onScroll = () => {
+      if (isLocked || isComplete) return;
+
+      const rect = section.getBoundingClientRect();
+      // Lock when the section's top edge is within the viewport
+      if (rect.top <= window.innerHeight * 0.5 && rect.bottom > 0) {
+        setIsLocked(true);
+        // Snap section to the top of the viewport
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isLocked, isComplete]);
+
+  // Lock body scroll and hijack wheel when locked
+  useEffect(() => {
+    if (!isLocked) return;
+
+    // Prevent all native scrolling
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    let cooldown = false;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Ignore all input during cooldown — one card per scroll gesture
+      if (cooldown) return;
+
+      const delta = e.deltaY;
+      wheelAccumulator.current += delta;
+
+      // Scroll down — reveal next card
+      if (delta > 0 && wheelAccumulator.current >= WHEEL_THRESHOLD) {
+        wheelAccumulator.current = 0;
+        cooldown = true;
+        setTimeout(() => { cooldown = false; }, 400);
+
+        setRevealedCount((prev) => {
+          const next = prev + 1;
+          if (next >= FEATURES.length) {
+            setIsLocked(false);
+            setIsComplete(true);
+            return FEATURES.length;
+          }
+          return next;
+        });
+      }
+      // Scroll up — hide cards
+      else if (delta < 0 && wheelAccumulator.current <= -WHEEL_THRESHOLD) {
+        wheelAccumulator.current = 0;
+        cooldown = true;
+        setTimeout(() => { cooldown = false; }, 400);
+
+        setRevealedCount((prev) => {
+          if (prev <= 1) {
+            setIsLocked(false);
+            setIsComplete(false);
+            return 1;
+          }
+          return prev - 1;
+        });
+      }
+    };
+
+    // Prevent touch scrolling on mobile
+    const onTouchMove = (e: TouchEvent) => {
+      if (isLocked) e.preventDefault();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', onWheel, { capture: true } as EventListenerOptions);
+      window.removeEventListener('touchmove', onTouchMove);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isLocked]);
+
+  // Reset when user scrolls back above the section
+  useEffect(() => {
+    if (!isComplete) return;
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top > window.innerHeight * 0.8) {
+        setIsComplete(false);
+        setRevealedCount(1);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isComplete]);
 
   return (
     <section
-      ref={containerRef}
+      ref={sectionRef}
       id="features"
       style={{
-        height: `${FEATURES.length * 80}vh`,
         position: 'relative',
         backgroundColor: '#F9F6EE',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '120px 24px 80px',
+        fontFamily: 'var(--font-inter), system-ui, sans-serif',
       }}
     >
-      <div 
-        style={{
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          fontFamily: 'var(--font-inter), system-ui, sans-serif',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          padding: '24px',
-        }}
-      >
-        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        
-        {/* Section Heading - Static while scrolling */}
-        <div
-          style={{
-            textAlign: 'center',
-            marginBottom: '60px',
-          }}
-        >
+      <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
+        {/* Section Heading */}
+        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
           <p
             style={{
               fontSize: '12px',
@@ -143,16 +240,43 @@ export default function FeaturesSection() {
 
         {/* Cards Stack */}
         <div style={{ position: 'relative', width: '100%', height: '450px' }}>
-          {FEATURES.map((feature, i) => (
-            <FeatureCard
-              key={feature.title}
-              feature={feature}
-              index={i}
-              total={FEATURES.length}
-              progress={progress}
+          <AnimatePresence>
+            {FEATURES.map((feature, i) => {
+              if (i >= revealedCount) return null;
+              return (
+                <FeatureCard
+                  key={feature.title}
+                  feature={feature}
+                  index={i}
+                  total={FEATURES.length}
+                  stackPosition={revealedCount - 1 - i}
+                />
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Progress dots */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '8px',
+            marginTop: '40px',
+          }}
+        >
+          {FEATURES.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i < revealedCount ? '24px' : '8px',
+                height: '8px',
+                borderRadius: '4px',
+                backgroundColor: i < revealedCount ? '#1a1a1a' : '#d1d1d1',
+                transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
             />
           ))}
-        </div>
         </div>
       </div>
     </section>
@@ -163,54 +287,44 @@ function FeatureCard({
   feature,
   index,
   total,
-  progress,
+  stackPosition,
 }: {
   feature: (typeof FEATURES)[number];
   index: number;
   total: number;
-  progress: MotionValue<number>;
+  stackPosition: number;
 }) {
-  const rangeStart = (index - 1) / total;
-  const rangeEnd = index / total;
+  // stackPosition: 0 = top (just arrived), 1 = one behind, 2 = further back
+  const yShift = stackPosition * 20;
 
-  // Make sure input ranges are strictly increasing and bounded within [0, 1]
-  const yInput = index === 0 ? [0, 1] : [rangeStart, rangeEnd];
-  const yOutput = index === 0 ? ['0vh', '0vh'] : ['100vh', '0vh'];
-  const y = useTransform(progress, yInput, yOutput);
-
-  // Each card scales down slightly after it arrives
-  const minScale = 1 - (total - 1 - index) * 0.04;
-  const scaleInput = rangeEnd >= 1 ? [0, 1] : [rangeEnd, 1];
-  const scaleOutput = rangeEnd >= 1 ? [1, 1] : [1, minScale];
-  const scale = useTransform(progress, scaleInput, scaleOutput);
-
-  // Cards slide in with a tilt from the start, alternating directions
-  const initialTilt = index % 2 === 0 ? -4 : 4;
-  const settledTilt = index % 2 === 0 ? -2 : 2;
-  
-  // Rotate during the slide-in phase so it starts with a larger tilt and settles
-  const rotateInput = index === 0 ? [0, 1] : [rangeStart, rangeEnd];
-  const rotateOutput = index === 0 ? [settledTilt, settledTilt] : [initialTilt, settledTilt];
-  const rotate = useTransform(progress, rotateInput, rotateOutput);
-
-  // Small fade-in for the cards (except the first one which is always visible)
-  const opacityInput = index === 0 ? [0, 1] : [rangeStart, rangeStart + 0.01];
-  const opacityOutput = index === 0 ? [1, 1] : [0, 1];
-  const opacity = useTransform(progress, opacityInput, opacityOutput);
+  // Alternating tilt: even cards tilt down-left/up-right, odd cards the opposite
+  const tilt = index % 2 === 0 ? 2 : -2;
+  // Entry tilt is more exaggerated, settles to subtle
+  const entryTilt = index % 2 === 0 ? 6 : -6;
 
   return (
     <motion.div
+      initial={{ y: '120%', opacity: 1, rotate: entryTilt }}
+      animate={{
+        y: -yShift,
+        opacity: 1,
+        rotate: tilt,
+      }}
+      exit={{ y: '120%', opacity: 1, rotate: entryTilt }}
+      transition={{
+        type: 'spring',
+        stiffness: 90,
+        damping: 22,
+        mass: 1.8,
+      }}
       style={{
         position: 'absolute',
-        top: `${index * 15}px`, // Slight staggering top gap
+        top: 0,
         left: 0,
         right: 0,
-        y,
-        scale,
-        rotate,
-        opacity,
-        transformOrigin: 'top center',
-        zIndex: index + 1,
+        transformOrigin: 'bottom center',
+        zIndex: total - stackPosition,
+        willChange: 'transform',
       }}
     >
       <div

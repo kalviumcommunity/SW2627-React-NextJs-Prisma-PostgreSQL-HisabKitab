@@ -30,6 +30,20 @@ export default function RegisterPage() {
     setStep(2);
   };
 
+  // Map raw API errors to user-friendly messages
+  const sanitizeError = (rawError) => {
+    const safeMessages = [
+      "Name must be at least 2 characters",
+      "Please enter a valid email address",
+      "Password must be at least 6 characters",
+      "Shop name must be at least 2 characters",
+      "A user with this email already exists.",
+    ];
+    // Only show the error if it's a known safe validation message
+    const isSafe = safeMessages.some((msg) => rawError?.toLowerCase().includes(msg.toLowerCase()));
+    return isSafe ? rawError : "Registration failed. Please check your details and try again.";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -50,7 +64,7 @@ export default function RegisterPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to register.");
+        setError(sanitizeError(data.error));
         setLoading(false);
       } else {
         router.push("/login?registered=true");

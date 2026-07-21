@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { ArrowUpRight, User } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { formatINR } from "@/lib/formatters";
 import styles from "./CurrenciesMarket.module.css";
 
 export default function CurrenciesMarket({ topDebtors = [] }) {
-  const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
   return (
     <div className={`${styles.card} group`}>
@@ -38,7 +38,7 @@ export default function CurrenciesMarket({ topDebtors = [] }) {
               </div>
               
               <div className="flex items-center gap-6 text-sm font-medium">
-                <div className="text-green-600 font-bold w-16 text-right tracking-tight">{formatCurrency(contact.balance)}</div>
+                <div className="text-green-600 font-bold w-16 text-right tracking-tight">{formatINR(contact.balance)}</div>
               </div>
             </motion.div>
           ))

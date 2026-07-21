@@ -1,28 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { UserPlus, MoreVertical, Briefcase, Calendar, CheckCircle2, Wallet, Clock } from "lucide-react";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Workers.module.css";
-
-// Animation Variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-};
 
 // Mock Data
 const mockWorkers = [
@@ -70,13 +52,6 @@ const mockWorkers = [
 
 export default function WorkersPage() {
   const { status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
 
   if (status === "loading") {
     // Relying on the global loader for now, but returning a blank skeleton avoids flashes

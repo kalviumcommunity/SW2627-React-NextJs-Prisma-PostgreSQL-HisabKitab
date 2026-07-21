@@ -1,27 +1,13 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Ledger.module.css";
 import PartyLedgerModal from "./PartyLedgerModal";
 import AddPartyModal from "./AddPartyModal";
-
-// Animation Variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } },
-};
 
 // Mock Data for Ledger
 const mockLedgerData = [
@@ -59,7 +45,6 @@ const mockLedgerData = [
 
 export default function LedgerPage() {
   const { status } = useSession();
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("COLLECT"); // COLLECT or GIVE
   const [activeParty, setActiveParty] = useState(null);
   const [isAddPartyModalOpen, setIsAddPartyModalOpen] = useState(false);
@@ -68,12 +53,6 @@ export default function LedgerPage() {
   const handleAddParty = (newParty) => {
     setParties([newParty, ...parties]);
   };
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
 
   if (status === "loading") {
     return <div style={{ minHeight: "100vh", backgroundColor: "#f9f6ee" }} />;

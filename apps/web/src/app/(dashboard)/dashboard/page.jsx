@@ -1,10 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar } from "lucide-react";
 
 import DateRangePicker from "@/components/dashboard/DateRangePicker";
 
@@ -14,31 +12,16 @@ import ActionCards from "@/components/dashboard/ActionCards";
 import CurrenciesMarket from "@/components/dashboard/CurrenciesMarket";
 import TopSpending from "@/components/dashboard/TopSpending";
 import BalanceChart from "@/components/dashboard/BalanceChart";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import { getDashboardData } from "./actions";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-};
 
 export default function DashboardPage() {
   const { status } = useSession();
-  const router = useRouter();
   const [dashboardData, setDashboardData] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    } else if (status === "authenticated") {
+    if (status === "authenticated") {
       getDashboardData().then((res) => {
         if (res.success) {
           setDashboardData(res.data);
@@ -48,7 +31,7 @@ export default function DashboardPage() {
         setDataLoading(false);
       });
     }
-  }, [status, router]);
+  }, [status]);
 
   if (status === "loading" || dataLoading) {
     return (

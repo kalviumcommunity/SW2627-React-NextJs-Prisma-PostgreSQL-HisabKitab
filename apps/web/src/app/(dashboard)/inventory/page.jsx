@@ -1,25 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, MoreVertical, Package, AlertTriangle, TrendingUp, RefreshCcw } from "lucide-react";
+import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Inventory.module.css";
-
-// Animation Variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } },
-};
 
 // Mock Data
 const mockInventory = [
@@ -82,13 +67,6 @@ const mockInventory = [
 
 export default function InventoryPage() {
   const { status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
 
   if (status === "loading") {
     return <div style={{ minHeight: "100vh", backgroundColor: "#f9f6ee" }} />;

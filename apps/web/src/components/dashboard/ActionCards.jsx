@@ -1,4 +1,4 @@
-import { Plus, ArrowUpRight, FileText, ChevronRight, NotebookPen } from "lucide-react";
+import { Plus, ArrowUpRight } from "lucide-react";
 import styles from "./ActionCards.module.css";
 import StackedNotes from "./StackedNotes";
 

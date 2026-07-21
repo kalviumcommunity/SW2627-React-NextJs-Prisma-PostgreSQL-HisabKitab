@@ -1,7 +1,7 @@
 import { Wallet, ArrowDownCircle, ArrowUpCircle, Users } from "lucide-react";
+import { formatINR } from "@/lib/formatters";
 
 export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContacts = 0 }) {
-  const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
   const netBalance = totalReceived - totalGiven;
 
   return (
@@ -15,7 +15,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Total Received</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatCurrency(totalReceived)}</h3>
+          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatINR(totalReceived)}</h3>
           <div className="flex items-center justify-center gap-2">
             <span className="bg-green-100 text-green-700 group-hover:bg-white/20 group-hover:text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full transition-colors duration-300">+6.1%</span>
             <span className="text-[11px] text-gray-400 group-hover:text-blue-100 font-medium transition-colors duration-300">Last Period</span>
@@ -32,7 +32,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Total Given</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatCurrency(totalGiven)}</h3>
+          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatINR(totalGiven)}</h3>
           <div className="flex items-center justify-center gap-2">
             <span className="bg-green-100 text-green-700 group-hover:bg-white/20 group-hover:text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full transition-colors duration-300">-2.4%</span>
             <span className="text-[11px] text-gray-400 group-hover:text-blue-100 font-medium transition-colors duration-300">Last Period</span>
@@ -49,7 +49,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Net Flow</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-colors duration-300">{netBalance > 0 ? '+' : ''}{formatCurrency(netBalance)}</h3>
+          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-colors duration-300">{netBalance > 0 ? '+' : ''}{formatINR(netBalance)}</h3>
           <p className="text-[13px] text-gray-400 group-hover:text-blue-100 font-medium mt-1 transition-colors duration-300">Total Received - Total Given</p>
         </div>
       </div>

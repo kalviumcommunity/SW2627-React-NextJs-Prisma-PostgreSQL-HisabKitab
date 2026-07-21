@@ -1,46 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@hisab-kitab/database";
+import { registerSchema } from "@hisab-kitab/shared";
 import bcrypt from "bcryptjs";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, password, shopName } = body;
 
-    // ── Inline validation ──────────────────────────────────────
-    if (!name || typeof name !== "string" || name.trim().length < 2) {
-      return NextResponse.json(
-        { error: "Name must be at least 2 characters." },
-        { status: 400 }
-      );
-    }
-    if (
-      !email ||
-      typeof email !== "string" ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
-      return NextResponse.json(
-        { error: "Please enter a valid email address." },
-        { status: 400 }
-      );
-    }
-    if (!password || typeof password !== "string" || password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters." },
-        { status: 400 }
-      );
-    }
-    if (
-      !shopName ||
-      typeof shopName !== "string" ||
-      shopName.trim().length < 2
-    ) {
-      return NextResponse.json(
-        { error: "Shop name must be at least 2 characters." },
-        { status: 400 }
-      );
+    // ── Validate with shared Zod schema ──────────────────────────
+    const parsed = registerSchema.safeParse(body);
+    if (!parsed.success) {
+      const firstError = parsed.error.errors[0]?.message || "Invalid input.";
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
+    const { name, email, password, shopName } = parsed.data;
     const lowerEmail = email.toLowerCase().trim();
 
     // ── Check existing user ────────────────────────────────────

@@ -1,28 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Phone, IndianRupee } from "lucide-react";
+import { overlayVariants, modalVariants } from "@/lib/animations";
 import styles from "./AddPartyModal.module.css";
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 25 }
-  },
-  exit: { 
-    opacity: 0, 
-    scale: 0.95, 
-    y: 20,
-    transition: { duration: 0.2 }
-  }
-};
 
 export default function AddPartyModal({ isOpen, onClose, onAddParty }) {
   const [balanceType, setBalanceType] = useState("COLLECT"); // "COLLECT" or "GIVE"

@@ -1,12 +1,9 @@
 import { Wallet, ChevronDown, ArrowUpRight, Plus } from "lucide-react";
+import { formatINR } from "@/lib/formatters";
 import styles from "./TotalBalanceCard.module.css";
 
 export default function TotalBalanceCard({ balance = 0 }) {
-  // Format the balance properly
-  const formattedBalance = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(balance);
+  const formattedBalance = formatINR(balance);
 
   return (
     <div className={`${styles.premiumCard} ${styles.totalBalanceCard}`}>
@@ -26,8 +23,8 @@ export default function TotalBalanceCard({ balance = 0 }) {
           </div>
 
           <div className={styles.currencySelector}>
-            <span className={styles.flagIcon}>US</span>
-            USD
+            <span className={styles.flagIcon}>₹</span>
+            INR
             <ChevronDown size={14} className="text-gray-400 ml-1" />
           </div>
         </div>

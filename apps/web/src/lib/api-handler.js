@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
 import { AppError } from "./errors";
 import { ZodError } from "zod";

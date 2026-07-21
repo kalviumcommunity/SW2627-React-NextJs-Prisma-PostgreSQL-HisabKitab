@@ -11,35 +11,49 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Please enter both email and password.");
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Please enter both email and password.");
+          }
+
+          const user = await db.user.findUnique({
+            where: { email: credentials.email.toLowerCase().trim() },
+            include: { shopMembers: { include: { shop: true } } },
+          });
+
+          if (!user || !user.passwordHash) {
+            // Generic message — don't reveal whether the email exists
+            throw new Error("Invalid email or password.");
+          }
+
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          );
+          if (!isValid) {
+            // Same generic message for wrong password
+            throw new Error("Invalid email or password.");
+          }
+
+          const activeShop = user.shopMembers?.[0]?.shopId || null;
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            activeShopId: activeShop,
+          };
+        } catch (error) {
+          // Re-throw user-facing auth errors (our own throws above)
+          if (error.message === "Invalid email or password." || 
+              error.message === "Please enter both email and password.") {
+            throw error;
+          }
+          // For any unexpected error (DB down, Prisma timeout, etc.),
+          // log it server-side but show a safe message to the user
+          console.error("[Auth] Login error:", error);
+          throw new Error("Something went wrong. Please try again later.");
         }
-
-        const user = await db.user.findUnique({
-          where: { email: credentials.email.toLowerCase().trim() },
-          include: { shopMembers: { include: { shop: true } } },
-        });
-
-        if (!user || !user.passwordHash) {
-          throw new Error("No user found with this email.");
-        }
-
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-        if (!isValid) {
-          throw new Error("Incorrect password.");
-        }
-
-        const activeShop = user.shopMembers?.[0]?.shopId || null;
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          activeShopId: activeShop,
-        };
       },
     }),
   ],

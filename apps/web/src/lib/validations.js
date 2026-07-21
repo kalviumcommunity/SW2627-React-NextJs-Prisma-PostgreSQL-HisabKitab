@@ -5,18 +5,8 @@ import { z } from "zod";
  * Centralizing these prevents SQL injection and ensures data integrity before it reaches Prisma.
  */
 
-// User Authentication
-export const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }).trim().toLowerCase(),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
-
-export const registerSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }).trim(),
-  email: z.string().email({ message: "Invalid email address" }).trim().toLowerCase(),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  shopName: z.string().min(2, { message: "Shop name must be at least 2 characters" }).trim(),
-});
+// Re-export auth schemas from the shared package (single source of truth)
+export { loginSchema, registerSchema } from "@hisab-kitab/shared";
 
 // Transactions
 export const createTransactionSchema = z.object({
