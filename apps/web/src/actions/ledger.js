@@ -28,7 +28,6 @@ export async function getContacts() {
     return contacts.map(c => ({
       id: c.id,
       name: c.name,
-      type: c.type,
       phone: c.phone || "No phone provided",
       balance: c.balance.toString(),
       // Add fake last transaction date for UI parity until we fetch real last transaction
@@ -47,7 +46,6 @@ export async function createContact(data) {
       data: {
         shopId: user.activeShopId,
         name: data.name,
-        type: data.type === "Customer" ? "CUSTOMER" : "SUPPLIER",
         phone: data.phone,
         balance: data.balance ? parseFloat(data.balance) : 0,
         createdBy: user.id,

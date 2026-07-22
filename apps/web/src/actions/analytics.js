@@ -31,7 +31,6 @@ export async function getTransactions() {
       partyName: tx.contact ? tx.contact.name : "Unknown Party",
       type: tx.type, // YOU_GOT, YOU_GAVE, SALE, PURCHASE, EXPENSE
       amount: tx.amount.toString(),
-      paymentMode: tx.paymentMode,
       date: tx.createdAt.toISOString(),
       note: tx.note || ""
     }));
@@ -58,7 +57,6 @@ export async function createTransaction(data) {
           data: {
             shopId: user.activeShopId,
             name: data.partyName || "Unknown Party",
-            type: txType === "YOU_GOT" ? "CUSTOMER" : "SUPPLIER",
             balance: 0,
             createdBy: user.id
           }
@@ -82,7 +80,6 @@ export async function createTransaction(data) {
           contactId: contact.id,
           amount: amountVal,
           type: txType,
-          paymentMode: data.paymentMode?.toUpperCase() || "CASH",
           note: data.note || "",
           createdAt: data.date ? new Date(data.date) : new Date(),
           createdBy: user.id,
@@ -93,9 +90,11 @@ export async function createTransaction(data) {
 
     revalidatePath("/analytics");
     revalidatePath("/ledger"); 
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error("Failed to create transaction:", error);
-    return { success: false, error: "Failed to create transaction" };
+    try { require('fs').appendFileSync('error_log.txt', String(error.message || error) + '\\n'); } catch(e){}
+    return { success: false, error: error.message || String(error) };
   }
 }

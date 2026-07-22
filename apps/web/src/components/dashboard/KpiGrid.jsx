@@ -10,10 +10,12 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
 
   const getDynamicClass = (text) => {
     if (typeof text !== 'string') text = String(text);
-    if (text.length > 15) return "text-[18px]";
-    if (text.length > 12) return "text-[24px]";
-    if (text.length > 9) return "text-[28px]";
-    return "text-[36px]";
+    if (text.length > 18) return "text-[14px]";
+    if (text.length > 15) return "text-[16px]";
+    if (text.length > 12) return "text-[20px]";
+    if (text.length > 9) return "text-[24px]";
+    if (text.length > 6) return "text-[28px]";
+    return "text-[32px]";
   };
 
   return (

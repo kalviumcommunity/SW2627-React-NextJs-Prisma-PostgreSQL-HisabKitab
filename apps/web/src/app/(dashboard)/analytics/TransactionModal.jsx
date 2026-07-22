@@ -17,13 +17,17 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
     if (!contactName || !amount) return;
 
     setLoading(true);
-    
+    // If the selected date is today, use current time so it sorts properly.
+    let finalDate = new Date();
+    if (date !== finalDate.toISOString().slice(0, 10)) {
+      finalDate = new Date(date);
+    }
+
     const newTransaction = {
       partyName: contactName,
-      date: new Date(date).toISOString(),
+      date: finalDate.toISOString(),
       type,
       amount: parseFloat(amount),
-      paymentMode: "CASH",
       note
     };
     

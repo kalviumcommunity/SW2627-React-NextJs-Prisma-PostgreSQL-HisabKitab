@@ -19,6 +19,8 @@ export default function AnalyticsView({ initialTransactions }) {
   const [filter, setFilter] = useState("ALL");
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleAddTransaction = async (newTx) => {
     // Optimistic UI update
@@ -28,6 +30,7 @@ export default function AnalyticsView({ initialTransactions }) {
     if (!result.success) {
       setTransactions(transactions); // Revert on failure
       console.error(result.error);
+      alert("Failed: " + result.error);
     }
   };
 
@@ -35,6 +38,12 @@ export default function AnalyticsView({ initialTransactions }) {
     if (filter === "ALL") return true;
     return tx.type === filter;
   });
+
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Calculate totals
   const totalGave = transactions.filter(t => t.type === "YOU_GAVE").reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
@@ -110,20 +119,34 @@ export default function AnalyticsView({ initialTransactions }) {
         <div className={styles.listHeader}>
           <h3 className={styles.listTitle}>Recent Activity</h3>
           <div className={styles.listFilters}>
+            <div className={styles.itemsPerPage}>
+              <select 
+                value={itemsPerPage} 
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className={styles.perPageSelect}
+              >
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+              </select>
+            </div>
             <button 
-              onClick={() => setFilter("ALL")}
+              onClick={() => { setFilter("ALL"); setCurrentPage(1); }}
               className={`${styles.filterBtn} ${filter === "ALL" ? styles.filterBtnActive : ""}`}
             >
               All
             </button>
             <button 
-              onClick={() => setFilter("YOU_GAVE")}
+              onClick={() => { setFilter("YOU_GAVE"); setCurrentPage(1); }}
               className={`${styles.filterBtn} ${filter === "YOU_GAVE" ? styles.filterBtnActive : ""}`}
             >
               Given
             </button>
             <button 
-              onClick={() => setFilter("YOU_GOT")}
+              onClick={() => { setFilter("YOU_GOT"); setCurrentPage(1); }}
               className={`${styles.filterBtn} ${filter === "YOU_GOT" ? styles.filterBtnActive : ""}`}
             >
               Got
@@ -133,7 +156,7 @@ export default function AnalyticsView({ initialTransactions }) {
 
         <div className={styles.transactionList}>
           <AnimatePresence mode="popLayout">
-            {filteredTransactions.map((tx) => {
+            {paginatedTransactions.map((tx) => {
               const formattedDate = new Date(tx.date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
               return (
                 <motion.div 
@@ -171,7 +194,6 @@ export default function AnalyticsView({ initialTransactions }) {
                     <span className={`${styles.amount} ${tx.type === "YOU_GAVE" ? styles.amountGave : styles.amountGot}`}>
                       ₹ {parseFloat(tx.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
-                    <span className={styles.balanceText}>{tx.paymentMode}</span>
                   </div>
 
                   <div className={styles.rowActions}>
@@ -196,6 +218,28 @@ export default function AnalyticsView({ initialTransactions }) {
               <FileText size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
               <p>No transactions found for this filter.</p>
             </motion.div>
+          )}
+
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className={styles.pageBtn}
+              >
+                Previous
+              </button>
+              <span className={styles.pageInfo}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className={styles.pageBtn}
+              >
+                Next
+              </button>
+            </div>
           )}
         </div>
       </motion.section>

@@ -326,3 +326,64 @@
   background-color: rgba(26, 26, 26, 0.08);
   color: #1a1a1a;
 }
+
+/* Pagination & Items Per Page */
+.itemsPerPage {
+  display: flex;
+  align-items: center;
+}
+
+.perPageSelect {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.perPageSelect:hover {
+  background-color: #e5e7eb;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.pageBtn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  background-color: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  color: #000;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}

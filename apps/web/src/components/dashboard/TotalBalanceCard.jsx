@@ -7,10 +7,12 @@ export default function TotalBalanceCard({ balance = 0 }) {
   
   // Dynamically scale font size based on amount length
   const amountLength = formattedBalance.length;
-  let dynamicFontSize = '3rem'; // Default 48px
-  if (amountLength > 15) dynamicFontSize = '1.75rem';
-  else if (amountLength > 12) dynamicFontSize = '2.25rem';
-  else if (amountLength > 9) dynamicFontSize = '2.5rem';
+  let dynamicFontSize = '2.5rem'; // Default 40px
+  if (amountLength > 18) dynamicFontSize = '1.25rem';
+  else if (amountLength > 15) dynamicFontSize = '1.5rem';
+  else if (amountLength > 12) dynamicFontSize = '1.75rem';
+  else if (amountLength > 9) dynamicFontSize = '2rem';
+  else if (amountLength > 6) dynamicFontSize = '2.25rem';
 
   return (
     <div className={`${styles.premiumCard} ${styles.totalBalanceCard}`}>

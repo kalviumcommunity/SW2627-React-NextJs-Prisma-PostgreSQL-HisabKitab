@@ -16,7 +16,8 @@ export default function WorkersView({ initialWorkers }) {
 
   const handleAddWorker = async (newWorker) => {
     // Optimistic Update
-    setWorkers([newWorker, ...workers]);
+    const optimisticWorker = { ...newWorker, id: `temp-${Date.now()}` };
+    setWorkers([optimisticWorker, ...workers]);
     
     // Server Action
     const result = await createWorker(newWorker);
