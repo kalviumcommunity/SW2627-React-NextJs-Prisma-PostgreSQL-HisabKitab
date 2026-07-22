@@ -1,0 +1,310 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.modalContainer {
+  background-color: #fcfcfc;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.header {
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.05);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: rgba(26, 26, 26, 0.5);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background-color: rgba(26, 26, 26, 0.05);
+  color: #1a1a1a;
+}
+
+.content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Segmented Control for Pay Type */
+.typeSelector {
+  display: flex;
+  background-color: rgba(26, 26, 26, 0.05);
+  border-radius: 12px;
+  padding: 0.25rem;
+  position: relative;
+}
+
+.typeBtn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(26, 26, 26, 0.6);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
+  border-radius: 10px;
+}
+
+.typeBtnActiveMonthly {
+  color: #3B82F6;
+}
+
+.typeBtnActiveDaily {
+  color: #F59E0B;
+}
+
+.activeBackground {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: calc(50% - 0.25rem);
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1;
+}
+
+/* Form Groups */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(26, 26, 26, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  color: rgba(26, 26, 26, 0.4);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  background-color: #f4f4f5;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 1rem 1rem 1rem 2.75rem;
+  font-size: 1rem;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(26, 26, 26, 0.3);
+}
+
+.input:focus {
+  background-color: #ffffff;
+  border-color: rgba(26, 26, 26, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.amountInput {
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 1.25rem 1rem 1.25rem 3rem;
+  font-family: var(--font-heading);
+}
+
+/* Select */
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  width: 100%;
+  background-color: #f4f4f5;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 1rem 1rem 1rem 2.75rem;
+  font-size: 1rem;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.select:focus {
+  background-color: #ffffff;
+  border-color: rgba(26, 26, 26, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Two column row */
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Status toggle */
+.statusToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: #f4f4f5;
+  border-radius: 12px;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: rgba(26, 26, 26, 0.15);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.toggle.toggleActive {
+  background-color: #10B981;
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle.toggleActive .toggleThumb {
+  transform: translateX(20px);
+}
+
+.statusText {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.statusHint {
+  font-size: 0.8rem;
+  color: rgba(26, 26, 26, 0.5);
+  margin-left: auto;
+}
+
+/* Submit Button */
+.footer {
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.05);
+}
+
+.submitBtn {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background-color: #1a1a1a;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #000000;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -12,28 +12,26 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contactName || !amount) return;
 
     setLoading(true);
-    // Mock network delay
-    setTimeout(() => {
-      const newTransaction = {
-        id: `tx${Date.now()}`,
-        contactName,
-        date: new Date(date).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        type,
-        amount: parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
-        balanceAfter: "0.00", // Mock balance
-        note
-      };
-      
-      onAddTransaction(newTransaction);
-      setLoading(false);
-      resetForm();
-      onClose();
-    }, 800);
+    
+    const newTransaction = {
+      partyName: contactName,
+      date: new Date(date).toISOString(),
+      type,
+      amount: parseFloat(amount),
+      paymentMode: "CASH",
+      note
+    };
+    
+    await onAddTransaction(newTransaction);
+    
+    setLoading(false);
+    resetForm();
+    onClose();
   };
 
   const resetForm = () => {

@@ -11,28 +11,26 @@ export default function AddPartyModal({ isOpen, onClose, onAddParty }) {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contactName) return;
 
     setLoading(true);
-    // Mock network delay
-    setTimeout(() => {
-      const parsedAmount = parseFloat(amount) || 0;
-      const netBalance = balanceType === "COLLECT" ? parsedAmount : -parsedAmount;
 
-      const newParty = {
-        id: `p${Date.now()}`,
-        contactName,
-        contactPhone: contactPhone || "No phone",
-        netBalance,
-      };
-      
-      onAddParty(newParty);
-      setLoading(false);
-      resetForm();
-      onClose();
-    }, 800);
+    const parsedAmount = parseFloat(amount) || 0;
+    const netBalance = balanceType === "COLLECT" ? parsedAmount : -parsedAmount;
+
+    const newParty = {
+      name: contactName,
+      phone: contactPhone || "No phone",
+      type: balanceType === "COLLECT" ? "Customer" : "Supplier",
+      balance: netBalance,
+    };
+    
+    await onAddParty(newParty);
+    setLoading(false);
+    resetForm();
+    onClose();
   };
 
   const resetForm = () => {

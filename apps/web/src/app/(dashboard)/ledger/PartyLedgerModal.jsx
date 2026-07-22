@@ -57,7 +57,8 @@ export default function PartyLedgerModal({ isOpen, onClose, party }) {
     return groups;
   }, {});
 
-  const isToCollect = party.netBalance > 0;
+  const balanceVal = party.balance ? parseFloat(party.balance) : 0;
+  const isToCollect = balanceVal > 0;
 
   return (
     <AnimatePresence>
@@ -85,18 +86,18 @@ export default function PartyLedgerModal({ isOpen, onClose, party }) {
             
             <div className={styles.contactInfo}>
               <div className={styles.avatar}>
-                {party.contactName.charAt(0).toUpperCase()}
+                {party.name ? party.name.charAt(0).toUpperCase() : "?"}
               </div>
               <div className={styles.contactDetails}>
-                <h3 className={styles.contactName}>{party.contactName}</h3>
-                <p className={styles.contactPhone}>{party.contactPhone}</p>
+                <h3 className={styles.contactName}>{party.name}</h3>
+                <p className={styles.contactPhone}>{party.phone}</p>
               </div>
             </div>
 
             <div className={styles.balanceBanner}>
               <span className={styles.balanceLabel}>Net Balance</span>
               <span className={`${styles.balanceValue} ${isToCollect ? styles.amountCollect : styles.amountGive}`}>
-                ₹ {Math.abs(party.netBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹ {Math.abs(balanceVal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 <span style={{ fontSize: '0.9rem', fontWeight: 500, marginLeft: '0.5rem', color: 'rgba(26,26,26,0.5)' }}>
                   {isToCollect ? "(To Collect)" : "(To Give)"}
                 </span>
