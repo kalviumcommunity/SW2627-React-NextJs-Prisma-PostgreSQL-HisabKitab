@@ -70,8 +70,8 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
             </button>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className={styles.content}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <div className={styles.content} style={{ flex: 1 }}>
               {/* SEGMENTED CONTROL */}
               <div className={styles.typeSelector}>
                 <div 

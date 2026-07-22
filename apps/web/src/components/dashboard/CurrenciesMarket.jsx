@@ -38,7 +38,7 @@ export default function CurrenciesMarket({ topDebtors = [] }) {
               </div>
               
               <div className="flex items-center gap-6 text-sm font-medium">
-                <div className="text-green-600 font-bold w-16 text-right tracking-tight">{formatINR(contact.balance)}</div>
+                <div className="text-green-600 font-bold text-right tracking-tight">{formatINR(contact.balance)}</div>
               </div>
             </motion.div>
           ))

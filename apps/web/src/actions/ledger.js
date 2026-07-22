@@ -50,6 +50,7 @@ export async function createContact(data) {
         type: data.type === "Customer" ? "CUSTOMER" : "SUPPLIER",
         phone: data.phone,
         balance: data.balance ? parseFloat(data.balance) : 0,
+        createdBy: user.id,
       }
     });
     revalidatePath("/ledger");

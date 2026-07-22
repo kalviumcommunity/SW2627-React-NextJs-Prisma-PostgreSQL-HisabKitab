@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Package, Tag, Hash, Box, IndianRupee } from "lucide-react";
+import { X, Package, Tag, Hash, Box, IndianRupee, Calendar } from "lucide-react";
 import { overlayVariants, modalVariants } from "@/lib/animations";
 import styles from "./AddInventoryModal.module.css";
 
@@ -12,6 +12,7 @@ export default function AddInventoryModal({ isOpen, onClose, onAddProduct }) {
   const [currentStock, setCurrentStock] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
   const [sellingPrice, setSellingPrice] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -31,6 +32,7 @@ export default function AddInventoryModal({ isOpen, onClose, onAddProduct }) {
       unit,
       purchasePrice: parseFloat(purchasePrice).toFixed(2),
       sellingPrice: parseFloat(sellingPrice).toFixed(2),
+      expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
     };
 
     await onAddProduct(newProduct);
@@ -48,6 +50,7 @@ export default function AddInventoryModal({ isOpen, onClose, onAddProduct }) {
     setCurrentStock("");
     setPurchasePrice("");
     setSellingPrice("");
+    setExpiryDate("");
   };
 
   if (!isOpen) return null;
@@ -78,8 +81,8 @@ export default function AddInventoryModal({ isOpen, onClose, onAddProduct }) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className={styles.content}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <div className={styles.content} style={{ flex: 1 }}>
               
               {/* NAME */}
               <div className={styles.formGroup}>
@@ -206,6 +209,20 @@ export default function AddInventoryModal({ isOpen, onClose, onAddProduct }) {
                       required
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* EXPIRY DATE */}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Expiry Date (Optional)</label>
+                <div className={styles.inputWrapper}>
+                  <Calendar size={18} className={styles.inputIcon} />
+                  <input
+                    type="date"
+                    className={styles.input}
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                  />
                 </div>
               </div>
 

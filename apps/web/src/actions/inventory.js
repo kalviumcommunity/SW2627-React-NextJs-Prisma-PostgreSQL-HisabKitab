@@ -34,6 +34,7 @@ export async function getProducts() {
       unit: p.unit,
       purchasePrice: p.purchasePrice.toString(),
       sellingPrice: p.sellingPrice.toString(),
+      expiryDate: p.expiryDate ? p.expiryDate.toISOString() : null,
       // calculate status based on stock
       status: parseFloat(p.currentStock.toString()) === 0 ? "Out" : (parseFloat(p.currentStock.toString()) <= 10 ? "Low" : "Healthy")
     }));
@@ -56,6 +57,8 @@ export async function createProduct(data) {
         unit: data.unit,
         purchasePrice: parseFloat(data.purchasePrice) || 0,
         sellingPrice: parseFloat(data.sellingPrice) || 0,
+        expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
+        createdBy: user.id,
       }
     });
     revalidatePath("/inventory");

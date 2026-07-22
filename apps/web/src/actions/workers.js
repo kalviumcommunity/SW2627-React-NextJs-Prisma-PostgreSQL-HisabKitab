@@ -57,6 +57,7 @@ export async function createWorker(data) {
         monthlySalary: data.monthlySalary ? parseFloat(data.monthlySalary) : null,
         dailyWageRate: data.dailyWageRate ? parseFloat(data.dailyWageRate) : null,
         joiningDate: new Date(data.joiningDate),
+        createdBy: user.id,
       }
     });
     revalidatePath("/workers");

@@ -4,6 +4,13 @@ import styles from "./TotalBalanceCard.module.css";
 
 export default function TotalBalanceCard({ balance = 0 }) {
   const formattedBalance = formatINR(balance);
+  
+  // Dynamically scale font size based on amount length
+  const amountLength = formattedBalance.length;
+  let dynamicFontSize = '3rem'; // Default 48px
+  if (amountLength > 15) dynamicFontSize = '1.75rem';
+  else if (amountLength > 12) dynamicFontSize = '2.25rem';
+  else if (amountLength > 9) dynamicFontSize = '2.5rem';
 
   return (
     <div className={`${styles.premiumCard} ${styles.totalBalanceCard}`}>
@@ -31,7 +38,7 @@ export default function TotalBalanceCard({ balance = 0 }) {
 
         {/* Amount Section */}
         <div className={styles.amountSection}>
-          <h2 className={styles.amountTitle}>
+          <h2 className={styles.amountTitle} style={{ fontSize: dynamicFontSize }}>
             {formattedBalance}
           </h2>
           <div className={styles.trendContainer}>

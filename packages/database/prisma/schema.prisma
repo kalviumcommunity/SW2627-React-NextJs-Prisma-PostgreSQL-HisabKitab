@@ -46,6 +46,11 @@ model User {
   productsDeleted       Product[]          @relation("ProductDeletedBy")
   workersDeleted        Worker[]           @relation("WorkerDeletedBy")
 
+  contactsCreated       Contact[]          @relation("ContactCreatedBy")
+  productsCreated       Product[]          @relation("ProductCreatedBy")
+  workersCreated        Worker[]           @relation("WorkerCreatedBy")
+  shopsCreated          Shop[]             @relation("ShopCreatedBy")
+
   @@index([email])
 }
 
@@ -123,6 +128,9 @@ model Shop {
   losses             Loss[]
   paperImportBatches PaperImportBatch[]
 
+  createdBy     String?
+  createdByUser User?   @relation("ShopCreatedBy", fields: [createdBy], references: [id])
+
   @@index([name])
 }
 
@@ -175,6 +183,9 @@ model Contact {
   transactions     Transaction[]
   attachments      Attachment[]
   paperImportPages PaperImportPage[]
+
+  createdBy        String?
+  createdByUser    User?               @relation("ContactCreatedBy", fields: [createdBy], references: [id])
 
   @@index([shopId])
   @@index([shopId, isDeleted])
@@ -362,6 +373,9 @@ model Worker {
   attendanceLogs  Attendance[]
   salaryPayments  SalaryPayment[]
 
+  createdBy       String?
+  createdByUser   User?           @relation("WorkerCreatedBy", fields: [createdBy], references: [id])
+
   @@index([shopId])
   @@index([shopId, isDeleted])
 }
@@ -456,6 +470,7 @@ model Product {
   reorderLevel  Int?
 
   currentStock  Decimal  @default(0) @db.Decimal(14, 2)
+  expiryDate    DateTime? @db.Date
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -469,6 +484,9 @@ model Product {
   batches       ProductBatch[]
   stockEntries  StockEntry[]
   losses        Loss[]
+
+  createdBy     String?
+  createdByUser User?          @relation("ProductCreatedBy", fields: [createdBy], references: [id])
 
   @@index([shopId])
   @@index([shopId, isDeleted])

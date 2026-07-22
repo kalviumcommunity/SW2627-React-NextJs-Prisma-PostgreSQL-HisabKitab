@@ -3,6 +3,18 @@ import { formatINR } from "@/lib/formatters";
 
 export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContacts = 0 }) {
   const netBalance = totalReceived - totalGiven;
+  
+  const formattedReceived = formatINR(totalReceived);
+  const formattedGiven = formatINR(totalGiven);
+  const formattedNet = `${netBalance > 0 ? '+' : ''}${formatINR(netBalance)}`;
+
+  const getDynamicClass = (text) => {
+    if (typeof text !== 'string') text = String(text);
+    if (text.length > 15) return "text-[18px]";
+    if (text.length > 12) return "text-[24px]";
+    if (text.length > 9) return "text-[28px]";
+    return "text-[36px]";
+  };
 
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-10">
@@ -15,7 +27,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Total Received</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatINR(totalReceived)}</h3>
+          <h3 className={`${getDynamicClass(formattedReceived)} leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-all duration-300`}>{formattedReceived}</h3>
           <div className="flex items-center justify-center gap-2">
             <span className="bg-green-100 text-green-700 group-hover:bg-white/20 group-hover:text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full transition-colors duration-300">+6.1%</span>
             <span className="text-[11px] text-gray-400 group-hover:text-blue-100 font-medium transition-colors duration-300">Last Period</span>
@@ -32,7 +44,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Total Given</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-colors duration-300">{formatINR(totalGiven)}</h3>
+          <h3 className={`${getDynamicClass(formattedGiven)} leading-none font-bold text-gray-900 group-hover:text-white mb-3.5 tracking-tight transition-all duration-300`}>{formattedGiven}</h3>
           <div className="flex items-center justify-center gap-2">
             <span className="bg-green-100 text-green-700 group-hover:bg-white/20 group-hover:text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full transition-colors duration-300">-2.4%</span>
             <span className="text-[11px] text-gray-400 group-hover:text-blue-100 font-medium transition-colors duration-300">Last Period</span>
@@ -49,7 +61,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Net Flow</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-colors duration-300">{netBalance > 0 ? '+' : ''}{formatINR(netBalance)}</h3>
+          <h3 className={`${getDynamicClass(formattedNet)} leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-all duration-300`}>{formattedNet}</h3>
           <p className="text-[13px] text-gray-400 group-hover:text-blue-100 font-medium mt-1 transition-colors duration-300">Total Received - Total Given</p>
         </div>
       </div>
@@ -63,7 +75,7 @@ export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContac
           <span className="font-semibold text-gray-700 group-hover:text-white transition-colors duration-300 text-[19px]">Contacts</span>
         </div>
         <div>
-          <h3 className="text-[42px] leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-colors duration-300">{totalContacts}</h3>
+          <h3 className={`${getDynamicClass(totalContacts)} leading-none font-bold text-gray-900 group-hover:text-white mb-2.5 tracking-tight transition-colors duration-300`}>{totalContacts}</h3>
           <p className="text-[13px] text-gray-400 group-hover:text-blue-100 font-medium mt-1 transition-colors duration-300">Active contacts in ledger</p>
         </div>
       </div>

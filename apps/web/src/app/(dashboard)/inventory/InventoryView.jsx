@@ -122,6 +122,18 @@ export default function InventoryView({ initialInventory }) {
                     <span className={styles.priceValue}>₹{product.purchasePrice}</span>
                   </div>
                 </div>
+
+                {/* Expiry Date */}
+                {product.expiryDate && (
+                  <div className={styles.pricingGrid} style={{ marginTop: '12px' }}>
+                    <div className={styles.priceGroup} style={{ width: '100%' }}>
+                      <span className={styles.priceLabel}>Expiry Date</span>
+                      <span className={styles.priceValue} style={{ fontSize: '14px' }}>
+                        {new Date(product.expiryDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className={styles.cardActions}>

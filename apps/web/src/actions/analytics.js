@@ -59,7 +59,8 @@ export async function createTransaction(data) {
             shopId: user.activeShopId,
             name: data.partyName || "Unknown Party",
             type: txType === "YOU_GOT" ? "CUSTOMER" : "SUPPLIER",
-            balance: 0
+            balance: 0,
+            createdBy: user.id
           }
         });
       }
@@ -83,7 +84,9 @@ export async function createTransaction(data) {
           type: txType,
           paymentMode: data.paymentMode?.toUpperCase() || "CASH",
           note: data.note || "",
-          createdAt: data.date ? new Date(data.date) : new Date()
+          createdAt: data.date ? new Date(data.date) : new Date(),
+          createdBy: user.id,
+          balanceAfter: Number(contact.balance || 0) + balanceAdjustment
         }
       });
     });
