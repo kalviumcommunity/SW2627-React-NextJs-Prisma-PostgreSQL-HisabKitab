@@ -58,3 +58,25 @@ export async function createContact(data) {
     return { success: false, error: "Failed to create contact" };
   }
 }
+
+export async function deleteContact(contactId) {
+  try {
+    const user = await getSessionContext();
+    if (user.shopRole !== "OWNER") {
+      throw new Error("Only owners can delete a party.");
+    }
+
+    await db.contact.update({
+      where: { id: contactId, shopId: user.activeShopId },
+      data: { isDeleted: true }
+    });
+
+    revalidatePath("/ledger");
+    revalidatePath("/analytics");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete contact:", error);
+    return { success: false, error: error.message || String(error) };
+  }
+}

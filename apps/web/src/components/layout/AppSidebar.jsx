@@ -13,6 +13,7 @@ import {
   BookOpen
 } from "lucide-react";
 import styles from "./AppSidebar.module.css";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -24,6 +25,29 @@ const navItems = [
 
 export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  
+  const permissions = session?.user?.shopPermissions || {};
+  const isOwner = session?.user?.shopRole === "OWNER";
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (isOwner) return true;
+    
+    // STAFF access logic based on permissions
+    switch (item.name) {
+      case "Ledger":
+        return permissions.canAccessLedger !== false;
+      case "Workers":
+        return permissions.canAccessWorkers !== false;
+      case "Inventory":
+        return permissions.canAccessInventory !== false;
+      case "Analytics":
+      case "Dashboard":
+        return permissions.canViewFinancials !== false;
+      default:
+        return true;
+    }
+  });
 
   return (
     <aside
@@ -36,7 +60,7 @@ export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
       </div>
 
       <nav className={styles.nav}>
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
@@ -49,18 +73,32 @@ export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
             </Link>
           );
         })}
+
+        {isOwner && (
+          <Link
+            href="/settings/staff"
+            className={`${styles.navItem} ${
+              pathname.startsWith("/settings/staff") ? styles.navItemActive : ""
+            }`}
+          >
+            <Users size={20} className={styles.navIcon} />
+            <span className={styles.navText}>Staff Approvals</span>
+          </Link>
+        )}
       </nav>
 
       <div className={styles.footer}>
-        <Link
-          href="/settings"
-          className={`${styles.navItem} ${
-            pathname.startsWith("/settings") ? styles.navItemActive : ""
-          }`}
-        >
-          <Settings size={20} className={styles.navIcon} />
-          <span className={styles.navText}>Settings</span>
-        </Link>
+        {isOwner && (
+          <Link
+            href="/settings"
+            className={`${styles.navItem} ${
+              pathname.startsWith("/settings") ? styles.navItemActive : ""
+            }`}
+          >
+            <Settings size={20} className={styles.navIcon} />
+            <span className={styles.navText}>Settings</span>
+          </Link>
+        )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={styles.collapseBtn}

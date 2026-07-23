@@ -1,12 +1,12 @@
 import { Wallet, ArrowDownCircle, ArrowUpCircle, Users } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
 
-export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContacts = 0 }) {
+export default function KpiGrid({ totalGiven = 0, totalReceived = 0, totalContacts = 0, hideFinancials = false }) {
   const netBalance = totalReceived - totalGiven;
   
-  const formattedReceived = formatINR(totalReceived);
-  const formattedGiven = formatINR(totalGiven);
-  const formattedNet = `${netBalance > 0 ? '+' : ''}${formatINR(netBalance)}`;
+  const formattedReceived = hideFinancials ? "••••••" : formatINR(totalReceived);
+  const formattedGiven = hideFinancials ? "••••••" : formatINR(totalGiven);
+  const formattedNet = hideFinancials ? "••••••" : `${netBalance > 0 ? '+' : ''}${formatINR(netBalance)}`;
 
   const getDynamicClass = (text) => {
     if (typeof text !== 'string') text = String(text);

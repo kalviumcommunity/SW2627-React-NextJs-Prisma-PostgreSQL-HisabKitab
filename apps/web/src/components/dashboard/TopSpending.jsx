@@ -1,43 +1,45 @@
 import { ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 import styles from "./TopSpending.module.css";
+import { formatINR } from "@/lib/formatters";
 
-export default function TopSpending({ topCreditors = [] }) {
-  const topCreditor = topCreditors[0];
-  const totalCreditorBalance = topCreditors.reduce((sum, c) => sum + Math.abs(c.balance), 0);
-  const ratio = totalCreditorBalance > 0 && topCreditor ? (Math.abs(topCreditor.balance) / totalCreditorBalance) * 100 : 0;
-
+export default function TopSpending({ topCreditors = [], hideFinancials }) {
   return (
     <div className={`${styles.card} group`}>
-      <div className="flex flex-col justify-center items-center gap-4 mb-8 w-full">
+      <div className="flex justify-between items-center mb-8">
+        <h3 className="text-lg font-bold text-gray-900">Top Creditors</h3>
         <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 active:scale-95 group-hover:shadow-sm">
           <ArrowUpRight size={18} className="text-gray-600" />
         </button>
-        <h3 className="text-lg font-bold text-gray-900">Top Creditors</h3>
       </div>
 
-      <div className="mt-auto w-full flex flex-col items-center">
+      <div 
+        className="flex flex-col gap-6 max-h-[120px] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         {topCreditors.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-4">No creditors found.</p>
         ) : (
-          <>
-            {/* Progress Bar Graphic */}
-            <div className="h-10 w-full rounded-full overflow-hidden flex bg-gray-100 mb-5 relative">
-               <div className="h-full bg-gray-200 transition-all duration-1000" style={{ width: `${100 - ratio}%`, backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px)" }}></div>
-               <div className="h-full bg-blue-600 rounded-full relative z-10 shadow-sm border-2 border-white -ml-2 transition-all duration-1000" style={{ width: `${ratio}%` }}></div>
-            </div>
-
-            {/* Legend */}
-            <div className="flex justify-center gap-5 text-sm font-semibold w-full">
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-600 shadow-sm"></div>
-                <span className="text-gray-900 text-xs truncate max-w-[100px]">{topCreditor.name}</span>
+          topCreditors.map((contact, idx) => (
+            <div 
+              key={contact.id || idx} 
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold shadow-sm">
+                  {contact.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-gray-900 leading-tight">{contact.name}</span>
+                  <span className="text-[11px] text-gray-400 font-medium">{contact.phone || "No phone"}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gray-300 shadow-sm"></div>
-                <span className="text-gray-400 text-xs">Others</span>
+              
+              <div className="flex items-center gap-6 text-sm font-medium">
+                <div className="text-red-500 font-bold text-right tracking-tight">{hideFinancials ? "****" : formatINR(Math.abs(contact.balance))}</div>
               </div>
             </div>
-          </>
+          ))
         )}
       </div>
     </div>

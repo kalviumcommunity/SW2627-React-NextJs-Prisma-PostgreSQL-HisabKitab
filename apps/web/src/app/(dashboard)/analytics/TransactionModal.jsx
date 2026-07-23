@@ -1,16 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, IndianRupee, FileText, Calendar } from "lucide-react";
+import { X, User, IndianRupee, FileText, Calendar, Phone } from "lucide-react";
 import { overlayVariants, modalVariants } from "@/lib/animations";
 import styles from "./TransactionModal.module.css";
 
-export default function TransactionModal({ isOpen, onClose, onAddTransaction }) {
+export default function TransactionModal({ isOpen, onClose, onAddTransaction, initialData }) {
   const [type, setType] = useState("YOU_GAVE");
   const [contactName, setContactName] = useState("");
+  const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setType(initialData.type || "YOU_GAVE");
+      setContactName(initialData.partyName || "");
+      setPhone(initialData.phone || "");
+      setAmount(initialData.amount ? initialData.amount.toString() : "");
+      setNote(initialData.note || "");
+      setDate(initialData.date ? new Date(initialData.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
+    } else {
+      resetForm();
+    }
+  }, [initialData, isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +39,7 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
 
     const newTransaction = {
       partyName: contactName,
+      phone,
       date: finalDate.toISOString(),
       type,
       amount: parseFloat(amount),
@@ -41,6 +56,7 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
   const resetForm = () => {
     setType("YOU_GAVE");
     setContactName("");
+    setPhone("");
     setAmount("");
     setNote("");
     setDate(new Date().toISOString().slice(0, 10));
@@ -68,7 +84,7 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
         >
           {/* HEADER */}
           <div className={styles.header}>
-            <h3 className={styles.title}>New Transaction</h3>
+            <h3 className={styles.title}>{initialData ? "Edit Transaction" : "New Transaction"}</h3>
             <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
               <X size={20} />
             </button>
@@ -110,6 +126,23 @@ export default function TransactionModal({ isOpen, onClose, onAddTransaction }) 
                     className={styles.input}
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
+                    disabled={!!initialData}
+                  />
+                </div>
+              </div>
+
+              {/* PHONE NUMBER */}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Phone Number (Optional)</label>
+                <div className={styles.inputWrapper}>
+                  <Phone size={18} className={styles.inputIcon} />
+                  <input
+                    type="tel"
+                    placeholder="Enter phone number"
+                    className={styles.input}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={!!initialData && !!initialData.phone}
                   />
                 </div>
               </div>

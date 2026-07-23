@@ -15,10 +15,12 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState(null);
 
+  const [role, setRole] = useState("OWNER");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [shopName, setShopName] = useState("");
+  const [shopId, setShopId] = useState("");
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -37,7 +39,10 @@ export default function RegisterPage() {
       "Please enter a valid email address",
       "Password must be at least 6 characters",
       "Shop name must be at least 2 characters",
+      "Shop ID not found",
       "A user with this email already exists.",
+      "This email is already registered as an Owner.",
+      "This email is already registered as a Worker.",
     ];
     // Only show the error if it's a known safe validation message
     const isSafe = safeMessages.some((msg) => rawError?.toLowerCase().includes(msg.toLowerCase()));
@@ -47,8 +52,12 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-    if (!shopName) {
+    if (role === 'OWNER' && !shopName) {
       setError("Shop name is required.");
+      return;
+    }
+    if (role === 'WORKER' && !shopId) {
+      setError("Shop ID is required.");
       return;
     }
 
@@ -56,10 +65,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      const payload = { name, email, password, role };
+      if (role === 'OWNER') payload.shopName = shopName;
+      if (role === 'WORKER') payload.shopId = shopId;
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, shopName }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -165,6 +178,26 @@ export default function RegisterPage() {
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 >
+                  {/* Role Toggle */}
+                  <div className={styles.roleToggleContainer} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <button
+                      type="button"
+                      className={`${styles.roleBtn} ${role === 'OWNER' ? styles.roleBtnActive : ''}`}
+                      onClick={() => setRole('OWNER')}
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: role === 'OWNER' ? '#f1f5f9' : 'transparent', fontWeight: role === 'OWNER' ? 600 : 400, cursor: 'pointer' }}
+                    >
+                      Owner
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.roleBtn} ${role === 'WORKER' ? styles.roleBtnActive : ''}`}
+                      onClick={() => setRole('WORKER')}
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: role === 'WORKER' ? '#f1f5f9' : 'transparent', fontWeight: role === 'WORKER' ? 600 : 400, cursor: 'pointer' }}
+                    >
+                      Worker
+                    </button>
+                  </div>
+
                   <div className={styles.stepIndicator}>
                     <span className={styles.stepBadge}>Step 1</span>
                     <span className={styles.stepTitle}>Account Details</span>
@@ -278,31 +311,63 @@ export default function RegisterPage() {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label
-                      htmlFor="shopName"
-                      className={`${styles.label} ${focusedField === "shopName" ? styles.labelFocused : ""
-                        }`}
-                    >
-                      Shop / Business Name
-                    </label>
-                    <div className={styles.inputWrapper}>
-                      <Store
-                        size={20}
-                        className={`${styles.inputIcon} ${focusedField === "shopName" ? styles.inputIconFocused : ""
-                          }`}
-                      />
-                      <input
-                        id="shopName"
-                        type="text"
-                        required
-                        value={shopName}
-                        onChange={(e) => setShopName(e.target.value)}
-                        onFocus={() => setFocusedField("shopName")}
-                        onBlur={() => setFocusedField(null)}
-                        placeholder="Sharma Kirana Store"
-                        className={styles.input}
-                      />
-                    </div>
+                    {role === 'OWNER' ? (
+                      <>
+                        <label
+                          htmlFor="shopName"
+                          className={`${styles.label} ${focusedField === "shopName" ? styles.labelFocused : ""
+                            }`}
+                        >
+                          Shop / Business Name
+                        </label>
+                        <div className={styles.inputWrapper}>
+                          <Store
+                            size={20}
+                            className={`${styles.inputIcon} ${focusedField === "shopName" ? styles.inputIconFocused : ""
+                              }`}
+                          />
+                          <input
+                            id="shopName"
+                            type="text"
+                            required
+                            value={shopName}
+                            onChange={(e) => setShopName(e.target.value)}
+                            onFocus={() => setFocusedField("shopName")}
+                            onBlur={() => setFocusedField(null)}
+                            placeholder="Sharma Kirana Store"
+                            className={styles.input}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <label
+                          htmlFor="shopId"
+                          className={`${styles.label} ${focusedField === "shopId" ? styles.labelFocused : ""
+                            }`}
+                        >
+                          Shop ID to Join
+                        </label>
+                        <div className={styles.inputWrapper}>
+                          <Store
+                            size={20}
+                            className={`${styles.inputIcon} ${focusedField === "shopId" ? styles.inputIconFocused : ""
+                              }`}
+                          />
+                          <input
+                            id="shopId"
+                            type="text"
+                            required
+                            value={shopId}
+                            onChange={(e) => setShopId(e.target.value)}
+                            onFocus={() => setFocusedField("shopId")}
+                            onBlur={() => setFocusedField(null)}
+                            placeholder="e.g. cm0abc123..."
+                            className={styles.input}
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div style={{ display: "flex", gap: "1rem" }}>

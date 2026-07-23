@@ -102,6 +102,12 @@ enum Role {
   STAFF
 }
 
+enum MemberStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
 model Shop {
   id        String   @id @default(cuid())
   name      String
@@ -135,11 +141,14 @@ model Shop {
 }
 
 model ShopMember {
-  id       String   @id @default(cuid())
+  id       String       @id @default(cuid())
   userId   String
   shopId   String
   role     Role
-  joinedAt DateTime @default(now())
+  status   MemberStatus @default(ACTIVE)
+  joinedAt DateTime     @default(now())
+  
+  permissions Json?     // Stores worker-specific page access permissions
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
@@ -156,6 +165,13 @@ model ShopMember {
 enum TransactionType {
   YOU_GAVE
   YOU_GOT
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PENDING_DELETION
 }
 
 model Contact {
@@ -201,6 +217,7 @@ model Transaction {
   type      TransactionType
   amount    Decimal         @db.Decimal(14, 2)
   note      String?
+  status    TransactionStatus @default(APPROVED)
 
   balanceAfter Decimal @db.Decimal(14, 2)
 
@@ -211,6 +228,9 @@ model Transaction {
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   deletedBy String?
+
+  editedAt DateTime?
+  editedBy String?
 
   createdBy String
   createdAt DateTime @default(now())

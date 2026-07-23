@@ -9,6 +9,7 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        shopId: { label: "Shop ID", type: "text" }, // Optional
       },
       async authorize(credentials) {
         try {
@@ -22,7 +23,6 @@ export const authOptions = {
           });
 
           if (!user || !user.passwordHash) {
-            // Generic message — don't reveal whether the email exists
             throw new Error("Invalid email or password.");
           }
 
@@ -31,28 +31,73 @@ export const authOptions = {
             user.passwordHash
           );
           if (!isValid) {
-            // Same generic message for wrong password
             throw new Error("Invalid email or password.");
           }
 
-          const activeShop = user.shopMembers?.[0]?.shopId || null;
+          const isGlobalOwner = user.shopMembers.some(sm => sm.role === "OWNER");
+          const isGlobalWorker = user.shopMembers.some(sm => sm.role === "STAFF");
+
+          // Enforce role separation
+          if (credentials.shopId && isGlobalOwner) {
+            throw new Error("This email is registered as an Owner. Please log in as an Owner.");
+          }
+          if (!credentials.shopId && isGlobalWorker && !isGlobalOwner) {
+            throw new Error("This email is registered as a Worker. Please log in as a Worker.");
+          }
+
+          let activeShop = user.shopMembers?.[0]?.shopId || null;
+          let shopStatus = user.shopMembers?.[0]?.status || null;
+          let shopRole = user.shopMembers?.[0]?.role || null;
+          let shopPermissions = user.shopMembers?.[0]?.permissions || null;
+
+          // If a shopId is provided during login (Worker join flow)
+          if (credentials.shopId) {
+            const requestedShopId = credentials.shopId.trim();
+            const existingMembership = user.shopMembers.find(
+              (sm) => sm.shopId === requestedShopId
+            );
+
+            if (!existingMembership) {
+              // Verify shop exists
+              const shopExists = await db.shop.findUnique({
+                where: { id: requestedShopId },
+              });
+              if (!shopExists) {
+                throw new Error("The provided Shop ID does not exist.");
+              }
+              // Create pending join request
+              await db.shopMember.create({
+                data: {
+                  userId: user.id,
+                  shopId: requestedShopId,
+                  role: "STAFF",
+                  status: "PENDING",
+                },
+              });
+              shopStatus = "PENDING";
+              shopRole = "STAFF";
+              shopPermissions = null;
+            } else {
+              shopStatus = existingMembership.status;
+              shopRole = existingMembership.role;
+              shopPermissions = existingMembership.permissions;
+            }
+            activeShop = requestedShopId; 
+          }
 
           return {
             id: user.id,
             name: user.name,
             email: user.email,
             activeShopId: activeShop,
+            shopStatus: shopStatus,
+            shopRole: shopRole,
+            shopPermissions: shopPermissions,
           };
         } catch (error) {
           // Re-throw user-facing auth errors (our own throws above)
-          if (error.message === "Invalid email or password." || 
-              error.message === "Please enter both email and password.") {
-            throw error;
-          }
-          // For any unexpected error (DB down, Prisma timeout, etc.),
-          // log it server-side but show a safe message to the user
-          console.error("[Auth] Login error:", error);
-          throw new Error("Something went wrong. Please try again later.");
+          if (error.message) throw new Error(error.message);
+          throw new Error("Authentication failed");
         }
       },
     }),
@@ -62,9 +107,17 @@ export const authOptions = {
       if (user) {
         token.userId = user.id;
         token.activeShopId = user.activeShopId;
+        token.shopStatus = user.shopStatus;
+        token.shopRole = user.shopRole;
+        token.shopPermissions = user.shopPermissions;
       }
       if (trigger === "update" && session?.activeShopId) {
         token.activeShopId = session.activeShopId;
+        token.shopStatus = session.shopStatus;
+        token.shopRole = session.shopRole;
+        if (session.shopPermissions !== undefined) {
+          token.shopPermissions = session.shopPermissions;
+        }
       }
       return token;
     },
@@ -72,6 +125,9 @@ export const authOptions = {
       if (token && session.user) {
         session.user.id = token.userId;
         session.user.activeShopId = token.activeShopId;
+        session.user.shopStatus = token.shopStatus;
+        session.user.shopRole = token.shopRole;
+        session.user.shopPermissions = token.shopPermissions;
       }
       return session;
     },

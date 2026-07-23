@@ -13,25 +13,116 @@ import {
 import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Transactions.module.css";
 import TransactionModal from "./TransactionModal";
-import { createTransaction } from "@/actions/analytics";
+import { createTransaction, approveTransaction, rejectTransaction, editTransaction, deleteTransaction, approveDeletion, rejectDeletion } from "@/actions/analytics";
+import { useSession } from "next-auth/react";
+import { Check, X, Trash2 } from "lucide-react";
 
 export default function AnalyticsView({ initialTransactions }) {
+  const { data: session } = useSession();
+  const isOwner = session?.user?.shopRole === "OWNER";
+  
   const [filter, setFilter] = useState("ALL");
   const [transactions, setTransactions] = useState(initialTransactions);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [processingId, setProcessingId] = useState(null);
 
   const handleAddTransaction = async (newTx) => {
-    // Optimistic UI update
     setTransactions([{ ...newTx, id: `temp-${Date.now()}` }, ...transactions]);
-
     const result = await createTransaction(newTx);
     if (!result.success) {
       setTransactions(transactions); // Revert on failure
       console.error(result.error);
       alert("Failed: " + result.error);
     }
+  };
+
+  const handleEditClick = (tx) => {
+    setEditingTransaction({
+      id: tx.id,
+      partyName: tx.partyName,
+      type: tx.type,
+      amount: tx.amount,
+      date: tx.date,
+      note: tx.note
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingTransaction(null);
+  };
+
+  const handleSaveTransaction = async (data) => {
+    if (editingTransaction) {
+      const result = await editTransaction(editingTransaction.id, data);
+      if (result.success) {
+        setTransactions(prev => prev.map(t => t.id === editingTransaction.id ? { ...t, ...data, status: isOwner ? "APPROVED" : "PENDING", amount: data.amount.toString(), editedAt: new Date().toISOString() } : t));
+      } else {
+        alert("Failed to edit: " + result.error);
+      }
+    } else {
+      await handleAddTransaction(data);
+    }
+    handleModalClose();
+  };
+
+  const handleDeleteClick = async (txId) => {
+    if (confirm("Are you sure you want to delete this transaction?")) {
+      const result = await deleteTransaction(txId);
+      if (result.success) {
+        if (isOwner) {
+          setTransactions(prev => prev.filter(t => t.id !== txId));
+        } else {
+          setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: "PENDING_DELETION" } : t));
+        }
+      } else {
+        alert("Failed to delete: " + result.error);
+      }
+    }
+  };
+
+  const handleApprove = async (txId) => {
+    setProcessingId(txId);
+    const res = await approveTransaction(txId);
+    if (res.success) {
+      setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: "APPROVED" } : t));
+    } else {
+      alert(res.error);
+    }
+    setProcessingId(null);
+  };
+
+  const handleReject = async (txId) => {
+    setProcessingId(txId);
+    const res = await rejectTransaction(txId);
+    if (res.success) {
+      setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: "REJECTED" } : t));
+    } else {
+      alert(res.error);
+    }
+    setProcessingId(null);
+  };
+
+  const handleApproveDel = async (txId) => {
+    setProcessingId(txId);
+    const res = await approveDeletion(txId);
+    if (res.success) {
+      setTransactions(prev => prev.filter(t => t.id !== txId));
+    } else alert(res.error);
+    setProcessingId(null);
+  };
+
+  const handleRejectDel = async (txId) => {
+    setProcessingId(txId);
+    const res = await rejectDeletion(txId);
+    if (res.success) {
+      setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: "APPROVED" } : t));
+    } else alert(res.error);
+    setProcessingId(null);
   };
 
   const filteredTransactions = transactions.filter(tx => {
@@ -175,7 +266,13 @@ export default function AnalyticsView({ initialTransactions }) {
                     </div>
                     <div className={styles.contactDetails}>
                       <span className={styles.contactName}>{tx.partyName}</span>
-                      <span className={styles.transactionDate}>{formattedDate}</span>
+                      <span className={styles.transactionDate}>
+                        {formattedDate} 
+                        {tx.status === "PENDING" && <span style={{ marginLeft: "8px", color: "#d97706", fontWeight: "bold", fontSize: "10px", background: "#fef3c7", padding: "2px 6px", borderRadius: "4px" }}>PENDING</span>}
+                        {tx.status === "REJECTED" && <span style={{ marginLeft: "8px", color: "#dc2626", fontWeight: "bold", fontSize: "10px", background: "#fee2e2", padding: "2px 6px", borderRadius: "4px" }}>REJECTED</span>}
+                        {tx.status === "PENDING_DELETION" && <span style={{ marginLeft: "8px", color: "#dc2626", fontWeight: "bold", fontSize: "10px", background: "#fee2e2", padding: "2px 6px", borderRadius: "4px" }}>DELETION REQUESTED</span>}
+                        {tx.editedAt && <span style={{ marginLeft: "8px", color: "#6b7280", fontSize: "10px", fontStyle: "italic" }}>(Edited)</span>}
+                      </span>
                     </div>
                   </div>
 
@@ -197,11 +294,55 @@ export default function AnalyticsView({ initialTransactions }) {
                   </div>
 
                   <div className={styles.rowActions}>
-                    <button className={styles.actionBtn} aria-label="Edit">
+                    {isOwner && tx.status === "PENDING" && (
+                      <>
+                        <button 
+                          className={styles.actionBtn} 
+                          style={{ color: '#059669', background: '#d1fae5', marginRight: '4px' }} 
+                          title="Approve"
+                          onClick={() => handleApprove(tx.id)}
+                          disabled={processingId === tx.id}
+                        >
+                          <Check size={16} />
+                        </button>
+                        <button 
+                          className={styles.actionBtn} 
+                          style={{ color: '#dc2626', background: '#fee2e2', marginRight: '8px' }} 
+                          title="Reject"
+                          onClick={() => handleReject(tx.id)}
+                          disabled={processingId === tx.id}
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
+                    {isOwner && tx.status === "PENDING_DELETION" && (
+                      <>
+                        <button 
+                          className={styles.actionBtn} 
+                          style={{ color: '#059669', background: '#d1fae5', marginRight: '4px' }} 
+                          title="Approve Deletion"
+                          onClick={() => handleApproveDel(tx.id)}
+                          disabled={processingId === tx.id}
+                        >
+                          <Check size={16} />
+                        </button>
+                        <button 
+                          className={styles.actionBtn} 
+                          style={{ color: '#dc2626', background: '#fee2e2', marginRight: '8px' }} 
+                          title="Reject Deletion"
+                          onClick={() => handleRejectDel(tx.id)}
+                          disabled={processingId === tx.id}
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
+                    <button className={styles.actionBtn} aria-label="Edit" onClick={() => handleEditClick(tx)} disabled={tx.status === "PENDING_DELETION"}>
                       <Edit2 size={16} />
                     </button>
-                    <button className={styles.actionBtn} aria-label="More">
-                      <MoreHorizontal size={16} />
+                    <button className={styles.actionBtn} aria-label="Delete" onClick={() => handleDeleteClick(tx.id)} disabled={tx.status === "PENDING_DELETION"}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </motion.div>
@@ -248,8 +389,9 @@ export default function AnalyticsView({ initialTransactions }) {
       {/* MODAL */}
       <TransactionModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onAddTransaction={handleAddTransaction}
+        onClose={handleModalClose} 
+        onAddTransaction={handleSaveTransaction}
+        initialData={editingTransaction}
       />
     </>
   );

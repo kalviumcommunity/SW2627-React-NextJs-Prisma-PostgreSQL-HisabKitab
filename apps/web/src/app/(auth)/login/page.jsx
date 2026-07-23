@@ -13,6 +13,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("OWNER");
+  const [shopId, setShopId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
@@ -23,6 +25,9 @@ export default function LoginPage() {
       "Invalid email or password.": "Invalid email or password.",
       "Please enter both email and password.": "Please enter both email and password.",
       "Something went wrong. Please try again later.": "Something went wrong. Please try again later.",
+      "This email is registered as an Owner. Please log in as an Owner.": "This email is registered as an Owner. Please log in as an Owner.",
+      "This email is registered as a Worker. Please log in as a Worker.": "This email is registered as a Worker. Please log in as a Worker.",
+      "The provided Shop ID does not exist.": "The provided Shop ID does not exist.",
     };
     // Return the known safe message, or a generic fallback for any unexpected error
     return safeMessages[rawError] || "Unable to sign in. Please check your credentials and try again.";
@@ -34,7 +39,11 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await signIn("credentials", { redirect: false, email, password });
+      const payload = { redirect: false, email, password };
+      if (role === 'WORKER' && shopId) {
+        payload.shopId = shopId;
+      }
+      const res = await signIn("credentials", payload);
       if (res?.error) {
         setError(sanitizeError(res.error));
         setLoading(false);
@@ -131,6 +140,26 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {/* Role Toggle */}
+            <div className={styles.roleToggleContainer} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <button
+                type="button"
+                className={`${styles.roleBtn} ${role === 'OWNER' ? styles.roleBtnActive : ''}`}
+                onClick={() => setRole('OWNER')}
+                style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: role === 'OWNER' ? '#f1f5f9' : 'transparent', fontWeight: role === 'OWNER' ? 600 : 400, cursor: 'pointer' }}
+              >
+                Owner
+              </button>
+              <button
+                type="button"
+                className={`${styles.roleBtn} ${role === 'WORKER' ? styles.roleBtnActive : ''}`}
+                onClick={() => setRole('WORKER')}
+                style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: role === 'WORKER' ? '#f1f5f9' : 'transparent', fontWeight: role === 'WORKER' ? 600 : 400, cursor: 'pointer' }}
+              >
+                Worker
+              </button>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
@@ -189,6 +218,36 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {role === 'WORKER' && (
+                <div className={styles.formGroup}>
+                  <label
+                    htmlFor="shopId"
+                    className={`${styles.label} ${focusedField === "shopId" ? styles.labelFocused : ""
+                      }`}
+                  >
+                    Shop ID
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <LockKeyhole
+                      size={20}
+                      className={`${styles.inputIcon} ${focusedField === "shopId" ? styles.inputIconFocused : ""
+                        }`}
+                    />
+                    <input
+                      id="shopId"
+                      type="text"
+                      required
+                      value={shopId}
+                      onChange={(e) => setShopId(e.target.value)}
+                      onFocus={() => setFocusedField("shopId")}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="e.g. cm0abc123..."
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Submit */}
               <button type="submit" disabled={loading} className={styles.submitBtn}>
                 {loading ? (
@@ -198,7 +257,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <span>Log In</span>
+                    <span>{role === 'WORKER' ? 'Join & Log In' : 'Log In'}</span>
                   </>
                 )}
               </button>

@@ -1,6 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
+import { X, ArrowUpRight, ArrowDownLeft, FileText, Plus, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import styles from "./PartyLedgerModal.module.css";
 
 // Mock specific transactions mapped by party ID
@@ -43,7 +44,10 @@ const panelVariants = {
   }
 };
 
-export default function PartyLedgerModal({ isOpen, onClose, party }) {
+export default function PartyLedgerModal({ isOpen, onClose, party, onNewTransaction, onDeleteParty }) {
+  const { data: session } = useSession();
+  const isOwner = session?.user?.shopRole === "OWNER";
+
   if (!isOpen || !party) return null;
 
   const transactions = mockPartyTransactions[party.id] || [];
@@ -91,6 +95,33 @@ export default function PartyLedgerModal({ isOpen, onClose, party }) {
               <div className={styles.contactDetails}>
                 <h3 className={styles.contactName}>{party.name}</h3>
                 <p className={styles.contactPhone}>{party.phone}</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginLeft: 'auto' }}>
+                <button 
+                  className={styles.newTxBtn}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#4f46e5', color: 'white', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}
+                  onClick={() => {
+                    onClose();
+                    onNewTransaction(party);
+                  }}
+                >
+                  <Plus size={16} />
+                  New Transaction
+                </button>
+                {isOwner && (
+                  <button 
+                    className={styles.deletePartyBtn}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#fee2e2', color: '#dc2626', padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '500' }}
+                    onClick={() => {
+                      if (confirm("Are you sure you want to delete this party? All transactions will remain but the party will be removed from your ledger.")) {
+                        onDeleteParty(party.id);
+                      }
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    Delete Party
+                  </button>
+                )}
               </div>
             </div>
 

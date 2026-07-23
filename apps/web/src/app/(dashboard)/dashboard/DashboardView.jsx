@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import TotalBalanceCard from "@/components/dashboard/TotalBalanceCard";
 import KpiGrid from "@/components/dashboard/KpiGrid";
@@ -11,6 +12,11 @@ import BalanceChart from "@/components/dashboard/BalanceChart";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function DashboardView({ dashboardData }) {
+  const { data: session } = useSession();
+  const permissions = session?.user?.shopPermissions || {};
+  const isOwner = session?.user?.shopRole === "OWNER";
+  const hideFinancials = !isOwner && permissions.canViewFinancials === false;
+
   return (
     <motion.div
       className="flex flex-col gap-6 pb-12 w-full max-w-7xl mx-auto"
@@ -35,9 +41,9 @@ export default function DashboardView({ dashboardData }) {
         
         {/* Left Column (4 spans on lg) */}
         <motion.div className="lg:col-span-4 flex flex-col gap-4" variants={itemVariants}>
-          <TotalBalanceCard balance={dashboardData?.totalBalance || 0} />
-          <CurrenciesMarket topDebtors={dashboardData?.topDebtors || []} />
-          <TopSpending topCreditors={dashboardData?.topCreditors || []} />
+          <TotalBalanceCard balance={dashboardData?.totalBalance || 0} hideFinancials={hideFinancials} />
+          <CurrenciesMarket topDebtors={dashboardData?.topDebtors || []} hideFinancials={hideFinancials} />
+          <TopSpending topCreditors={dashboardData?.topCreditors || []} hideFinancials={hideFinancials} />
         </motion.div>
 
         {/* Middle and Right Columns Container (8 spans on lg) */}
@@ -51,6 +57,7 @@ export default function DashboardView({ dashboardData }) {
                 totalGiven={dashboardData?.totalGiven || 0}
                 totalReceived={dashboardData?.totalReceived || 0}
                 totalContacts={dashboardData?.totalContacts || 0}
+                hideFinancials={hideFinancials}
               />
             </motion.div>
             

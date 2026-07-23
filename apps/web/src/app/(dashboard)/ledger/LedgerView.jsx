@@ -7,13 +7,16 @@ import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Ledger.module.css";
 import PartyLedgerModal from "./PartyLedgerModal";
 import AddPartyModal from "./AddPartyModal";
-import { createContact } from "@/actions/ledger";
+import TransactionModal from "../analytics/TransactionModal";
+import { createContact, deleteContact } from "@/actions/ledger";
+import { createTransaction } from "@/actions/analytics";
 
 export default function LedgerView({ initialContacts }) {
   const [activeTab, setActiveTab] = useState("COLLECT"); // COLLECT or GIVE
   const [activeParty, setActiveParty] = useState(null);
   const [isAddPartyModalOpen, setIsAddPartyModalOpen] = useState(false);
   const [parties, setParties] = useState(initialContacts);
+  const [transactionModalData, setTransactionModalData] = useState(null);
 
   const handleAddParty = async (newParty) => {
     // Add fake ID so optimistic UI can render
@@ -27,6 +30,29 @@ export default function LedgerView({ initialContacts }) {
     } else {
       // In a real app we'd fetch the real ID, but Next.js Server Actions with revalidatePath 
       // will cause the page to reload the data anyway.
+    }
+  };
+
+  const handleNewTransactionClick = (party) => {
+    setTransactionModalData({ partyName: party.name, phone: party.phone || "" });
+  };
+
+  const handleAddTransactionSubmit = async (data) => {
+    const result = await createTransaction(data);
+    if (!result.success) {
+      alert("Failed to create transaction: " + result.error);
+    } else {
+      setTransactionModalData(null);
+    }
+  };
+
+  const handleDeleteParty = async (partyId) => {
+    setActiveParty(null);
+    const result = await deleteContact(partyId);
+    if (result.success) {
+      setParties(parties.filter(p => p.id !== partyId));
+    } else {
+      alert("Failed to delete party: " + result.error);
     }
   };
 
@@ -46,9 +72,9 @@ export default function LedgerView({ initialContacts }) {
         initial="hidden"
         animate="show"
         style={{ 
-          filter: (activeParty || isAddPartyModalOpen) ? "blur(8px)" : "none", 
+          filter: (activeParty || isAddPartyModalOpen || transactionModalData) ? "blur(8px)" : "none", 
           transition: "filter 0.3s ease",
-          pointerEvents: (activeParty || isAddPartyModalOpen) ? "none" : "auto"
+          pointerEvents: (activeParty || isAddPartyModalOpen || transactionModalData) ? "none" : "auto"
         }}
       >
       {/* HEADER */}
@@ -188,12 +214,21 @@ export default function LedgerView({ initialContacts }) {
         isOpen={!!activeParty} 
         onClose={() => setActiveParty(null)} 
         party={activeParty} 
+        onNewTransaction={handleNewTransactionClick}
+        onDeleteParty={handleDeleteParty}
       />
 
       <AddPartyModal 
         isOpen={isAddPartyModalOpen} 
         onClose={() => setIsAddPartyModalOpen(false)} 
         onAddParty={handleAddParty} 
+      />
+
+      <TransactionModal 
+        isOpen={!!transactionModalData} 
+        onClose={() => setTransactionModalData(null)} 
+        onAddTransaction={handleAddTransactionSubmit}
+        initialData={transactionModalData}
       />
     </>
   );
