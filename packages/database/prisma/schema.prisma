@@ -133,6 +133,7 @@ model Shop {
   products           Product[]
   losses             Loss[]
   paperImportBatches PaperImportBatch[]
+  personalNotes      PersonalNote[]
 
   createdBy     String?
   createdByUser User?   @relation("ShopCreatedBy", fields: [createdBy], references: [id])
@@ -631,4 +632,22 @@ model PaperImportPage {
   attachments       Attachment[]
 
   @@index([batchId, status])
+}
+
+// ============================================================================
+// 9. DASHBOARD NOTES
+// ============================================================================
+
+model PersonalNote {
+  id        String   @id @default(cuid())
+  shopId    String
+  title     String
+  body      String
+  color     String   @default("bg-blue-500")
+  bgColor   String   @default("bg-blue-50")
+  createdAt DateTime @default(now())
+
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, createdAt])
 }

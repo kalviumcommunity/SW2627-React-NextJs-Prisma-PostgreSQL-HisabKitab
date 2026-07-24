@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Loader2 } from "lucide-react";
+import { deletePersonalNote } from "@/app/(dashboard)/dashboard/actions";
+import { useRouter } from "next/navigation";
 
 const fallbackNotes = [
   {
@@ -41,6 +44,8 @@ const fallbackNotes = [
 export default function StackedNotes({ notes = [] }) {
   const displayNotes = notes.length > 0 ? notes : fallbackNotes;
   const [cards, setCards] = useState(displayNotes);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (notes.length > 0) {
@@ -57,6 +62,30 @@ export default function StackedNotes({ notes = [] }) {
         newCards.push(swipedCard);
         return newCards;
       });
+    }
+  };
+
+  const handleDelete = async (id, e) => {
+    e.stopPropagation();
+    if (isDeleting) return;
+    
+    // If it's a fallback note, just remove it from UI
+    if (notes.length === 0) {
+      setCards(prev => prev.filter(c => c.id !== id));
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const res = await deletePersonalNote(id);
+      if (res.success) {
+        setCards(prev => prev.filter(c => c.id !== id));
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -103,15 +132,24 @@ export default function StackedNotes({ notes = [] }) {
               style={{ transformOrigin: "center center" }}
             >
               {isTop ? (
-                <div className="flex items-start gap-4 p-5">
+                <div className="flex items-start gap-4 p-5 relative">
                   <div className={`w-2.5 h-2.5 mt-1.5 shrink-0 rounded-full ${note.color} shadow-sm`}></div>
-                  <div className="flex-1 pointer-events-none">
+                  <div className="flex-1 pointer-events-none pr-6">
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="text-base font-bold text-gray-900">{note.title}</h4>
                       <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{note.time}</span>
                     </div>
-                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{note.body}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 break-words">{note.body}</p>
                   </div>
+                  
+                  {/* Delete Button */}
+                  <button 
+                    onClick={(e) => handleDelete(note.id, e)}
+                    disabled={isDeleting}
+                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full hover:bg-black/5 text-gray-400 hover:text-gray-600 transition-colors z-50 cursor-pointer"
+                  >
+                    {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
+                  </button>
                 </div>
               ) : (
                 <div className="p-5 invisible">

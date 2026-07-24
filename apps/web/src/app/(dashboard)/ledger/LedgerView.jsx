@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
 import { containerVariants, itemVariants } from "@/lib/animations";
+import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import styles from "./Ledger.module.css";
 import PartyLedgerModal from "./PartyLedgerModal";
 import AddPartyModal from "./AddPartyModal";
@@ -17,6 +18,10 @@ export default function LedgerView({ initialContacts }) {
   const [isAddPartyModalOpen, setIsAddPartyModalOpen] = useState(false);
   const [parties, setParties] = useState(initialContacts);
   const [transactionModalData, setTransactionModalData] = useState(null);
+
+  useEffect(() => {
+    setParties(initialContacts);
+  }, [initialContacts]);
 
   const handleAddParty = async (newParty) => {
     // Add fake ID so optimistic UI can render
@@ -83,15 +88,18 @@ export default function LedgerView({ initialContacts }) {
           <h2 className={styles.title}>Ledger</h2>
           <p className={styles.subtitle}>Manage outstanding balances with your contacts</p>
         </div>
-        <motion.button
-          className={styles.primaryBtn}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsAddPartyModalOpen(true)}
-        >
-          <Plus size={18} />
-          <span>Add Party</span>
-        </motion.button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <DateRangePicker />
+          <motion.button
+            className={styles.primaryBtn}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsAddPartyModalOpen(true)}
+          >
+            <Plus size={18} />
+            <span>Add Party</span>
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* SUMMARY CARDS */}

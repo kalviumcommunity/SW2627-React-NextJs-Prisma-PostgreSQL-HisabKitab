@@ -3,21 +3,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronDown, Check } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function DateRangePicker() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentRange = searchParams.get("range") || "All Time";
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRange, setSelectedRange] = useState("January 12 - Jan 31, 2026");
   const dropdownRef = useRef(null);
 
   const ranges = [
     "Today",
     "Yesterday",
     "Last 7 Days",
-    "Last 30 Days",
     "This Month",
     "Last Month",
-    "January 12 - Jan 31, 2026",
-    "Custom Range..."
+    "All Time"
   ];
 
   // Close on outside click
@@ -41,7 +42,7 @@ export default function DateRangePicker() {
           }`}
       >
         <Calendar size={16} className={`transition-transform duration-300 ${isOpen ? "text-indigo-600 scale-110" : "text-indigo-400 group-hover:scale-110"}`} />
-        <span className="min-w-[170px] text-left">{selectedRange}</span>
+        <span className="min-w-[130px] text-left">{currentRange}</span>
         <ChevronDown
           size={16}
           className={`transition-transform duration-300 ${isOpen ? "rotate-180 text-indigo-600" : "text-gray-400 group-hover:text-indigo-400"}`}
@@ -62,15 +63,19 @@ export default function DateRangePicker() {
             </div>
             <div className="flex flex-col gap-0.5">
               {ranges.map((range) => {
-                const isSelected = selectedRange === range;
+                const isSelected = currentRange === range;
                 return (
                   <button
                     key={range}
                     onClick={() => {
-                      setSelectedRange(range);
                       setIsOpen(false);
-                      // In the future, this is where we'd trigger the database fetch
-                      // e.g., onDateRangeChange(range)
+                      const params = new URLSearchParams(searchParams.toString());
+                      if (range === "All Time") {
+                        params.delete("range");
+                      } else {
+                        params.set("range", range);
+                      }
+                      router.push(`?${params.toString()}`);
                     }}
                     className={`flex items-center justify-between w-full text-left px-3 py-2.5 rounded-[8px] text-sm transition-all duration-200 group ${isSelected
                         ? "bg-indigo-50/80 text-indigo-700 font-bold"

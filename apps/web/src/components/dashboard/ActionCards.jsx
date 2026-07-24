@@ -1,14 +1,21 @@
+import { useState } from "react";
 import { Plus, ArrowUpRight } from "lucide-react";
 import styles from "./ActionCards.module.css";
 import StackedNotes from "./StackedNotes";
+import PersonalNoteModal from "./PersonalNoteModal";
 
 export default function ActionCards({ recentNotes = [] }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Add Personal Note */}
       <div className={`${styles.card} min-h-[260px] group`}>
         <div className="flex flex-col justify-center items-center gap-3 z-10 relative w-full pt-8">
-          <button className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 active:scale-95 bg-white group-hover:shadow-sm ">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-300 active:scale-95 bg-white group-hover:shadow-sm "
+          >
             <Plus size={24} className="text-gray-600 group-hover:text-blue-600 transition-colors" />
           </button>
           <h3 className="text-xl font-bold text-gray-900 leading-tight">Add Personal Note</h3>
@@ -33,6 +40,11 @@ export default function ActionCards({ recentNotes = [] }) {
       <div className="w-full flex justify-center mt-2">
         <StackedNotes notes={recentNotes} />
       </div>
+
+      <PersonalNoteModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }
