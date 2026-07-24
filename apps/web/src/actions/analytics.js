@@ -13,7 +13,7 @@ async function getSessionContext() {
   return session.user;
 }
 
-export async function getTransactions() {
+export async function getTransactions(range = "All Time") {
   try {
     const user = await getSessionContext();
     
@@ -25,6 +25,31 @@ export async function getTransactions() {
         isDeleted: false
       }
     };
+
+    let startDate = null;
+    let endDate = null;
+    const now = new Date();
+    
+    if (range === "Today") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000 - 1);
+    } else if (range === "Yesterday") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000 - 1);
+    } else if (range === "Last 7 Days") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      endDate = now;
+    } else if (range === "This Month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else if (range === "Last Month") {
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    }
+
+    if (startDate && endDate) {
+      whereClause.createdAt = { gte: startDate, lte: endDate };
+    }
 
     // If STAFF, only show APPROVED transactions, OR their own PENDING transactions
     if (user.shopRole === "STAFF") {

@@ -87,6 +87,10 @@
   color: #1a1a1a;
 }
 
+.avatarLink {
+  text-decoration: none;
+}
+
 .avatar {
   width: 36px;
   height: 36px;

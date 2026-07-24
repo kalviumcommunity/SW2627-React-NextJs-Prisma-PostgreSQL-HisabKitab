@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
-import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import TotalBalanceCard from "@/components/dashboard/TotalBalanceCard";
 import KpiGrid from "@/components/dashboard/KpiGrid";
 import ActionCards from "@/components/dashboard/ActionCards";
@@ -32,7 +31,6 @@ export default function DashboardView({ dashboardData }) {
         </div>
         
         <div className="flex gap-4 items-center">
-          <DateRangePicker />
         </div>
       </motion.div>
 

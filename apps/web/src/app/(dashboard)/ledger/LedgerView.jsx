@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ArrowUpRight, ArrowDownLeft, FileText } from "lucide-react";
 import { containerVariants, itemVariants } from "@/lib/animations";
-import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import styles from "./Ledger.module.css";
 import PartyLedgerModal from "./PartyLedgerModal";
 import AddPartyModal from "./AddPartyModal";
@@ -89,7 +88,6 @@ export default function LedgerView({ initialContacts }) {
           <p className={styles.subtitle}>Manage outstanding balances with your contacts</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <DateRangePicker />
           <motion.button
             className={styles.primaryBtn}
             whileHover={{ scale: 1.02 }}

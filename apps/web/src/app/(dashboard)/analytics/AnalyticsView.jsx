@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -8,7 +8,9 @@ import {
   ArrowDownLeft, 
   MoreHorizontal, 
   FileText,
-  Edit2
+  Edit2,
+  Search,
+  Calendar
 } from "lucide-react";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import styles from "./Transactions.module.css";
@@ -22,7 +24,14 @@ export default function AnalyticsView({ initialTransactions }) {
   const isOwner = session?.user?.shopRole === "OWNER";
   
   const [filter, setFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [transactions, setTransactions] = useState(initialTransactions);
+
+  useEffect(() => {
+    setTransactions(initialTransactions);
+  }, [initialTransactions]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -126,8 +135,13 @@ export default function AnalyticsView({ initialTransactions }) {
   };
 
   const filteredTransactions = transactions.filter(tx => {
-    if (filter === "ALL") return true;
-    return tx.type === filter;
+    if (filter !== "ALL" && tx.type !== filter) return false;
+    if (searchQuery && !tx.partyName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (dateFilter) {
+      const txDate = new Date(tx.date).toISOString().slice(0, 10);
+      if (txDate !== dateFilter) return false;
+    }
+    return true;
   });
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -209,39 +223,67 @@ export default function AnalyticsView({ initialTransactions }) {
       <motion.section className={styles.listContainer} variants={itemVariants}>
         <div className={styles.listHeader}>
           <h3 className={styles.listTitle}>Recent Activity</h3>
-          <div className={styles.listFilters}>
-            <div className={styles.itemsPerPage}>
-              <select 
-                value={itemsPerPage} 
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className={styles.perPageSelect}
-              >
-                <option value={10}>10 per page</option>
-                <option value={25}>25 per page</option>
-                <option value={50}>50 per page</option>
-              </select>
+          <div className={styles.listFiltersContainer}>
+            <div className={styles.searchBar}>
+              <Search size={16} className={styles.searchIcon} />
+              <input 
+                type="text" 
+                placeholder="Search by party..." 
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className={styles.searchInput}
+              />
             </div>
-            <button 
-              onClick={() => { setFilter("ALL"); setCurrentPage(1); }}
-              className={`${styles.filterBtn} ${filter === "ALL" ? styles.filterBtnActive : ""}`}
-            >
-              All
-            </button>
-            <button 
-              onClick={() => { setFilter("YOU_GAVE"); setCurrentPage(1); }}
-              className={`${styles.filterBtn} ${filter === "YOU_GAVE" ? styles.filterBtnActive : ""}`}
-            >
-              Given
-            </button>
-            <button 
-              onClick={() => { setFilter("YOU_GOT"); setCurrentPage(1); }}
-              className={`${styles.filterBtn} ${filter === "YOU_GOT" ? styles.filterBtnActive : ""}`}
-            >
-              Got
-            </button>
+            
+            <div className={styles.dateFilter}>
+              <Calendar size={16} className={styles.searchIcon} />
+              <input 
+                type="date"
+                value={dateFilter}
+                onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1); }}
+                className={styles.searchInput}
+              />
+              {dateFilter && (
+                <button onClick={() => { setDateFilter(""); setCurrentPage(1); }} className={styles.clearDateBtn}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className={styles.listFilters}>
+              <div className={styles.itemsPerPage}>
+                <select 
+                  value={itemsPerPage} 
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className={styles.perPageSelect}
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                </select>
+              </div>
+              <button 
+                onClick={() => { setFilter("ALL"); setCurrentPage(1); }}
+                className={`${styles.filterBtn} ${filter === "ALL" ? styles.filterBtnActive : ""}`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => { setFilter("YOU_GAVE"); setCurrentPage(1); }}
+                className={`${styles.filterBtn} ${filter === "YOU_GAVE" ? styles.filterBtnActive : ""}`}
+              >
+                Given
+              </button>
+              <button 
+                onClick={() => { setFilter("YOU_GOT"); setCurrentPage(1); }}
+                className={`${styles.filterBtn} ${filter === "YOU_GOT" ? styles.filterBtnActive : ""}`}
+              >
+                Got
+              </button>
+            </div>
           </div>
         </div>
 

@@ -161,6 +161,73 @@
   color: #1a1a1a;
 }
 
+.listFiltersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .listFiltersContainer {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+  }
+}
+
+.searchBar, .dateFilter {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid rgba(26, 26, 26, 0.15);
+  border-radius: 20px;
+  padding: 0.35rem 0.75rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.searchBar:focus-within, .dateFilter:focus-within {
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.05);
+}
+
+.searchIcon {
+  color: rgba(26, 26, 26, 0.4);
+  margin-right: 0.5rem;
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  color: #1a1a1a;
+  width: 150px;
+}
+
+.searchInput::placeholder {
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.clearDateBtn {
+  background: transparent;
+  border: none;
+  color: rgba(26, 26, 26, 0.4);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.clearDateBtn:hover {
+  background-color: rgba(26, 26, 26, 0.1);
+  color: #1a1a1a;
+}
+
 .listFilters {
   display: flex;
   gap: 0.75rem;

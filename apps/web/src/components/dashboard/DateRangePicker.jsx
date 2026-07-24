@@ -75,7 +75,7 @@ function DateRangePickerInner() {
                       } else {
                         params.set("range", range);
                       }
-                      router.push(`?${params.toString()}`);
+                      router.push(`?${params.toString()}`, { scroll: false });
                     }}
                     className={`flex items-center justify-between w-full text-left px-3 py-2.5 rounded-[8px] text-sm transition-all duration-200 group ${isSelected
                         ? "bg-indigo-50/80 text-indigo-700 font-bold"

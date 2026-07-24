@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { Search } from "lucide-react";
+import Link from "next/link";
 import styles from "./AppHeader.module.css";
 
 export default function AppHeader() {
@@ -21,12 +21,6 @@ export default function AppHeader() {
       </div>
 
       <div className={styles.right}>
-        <button className={styles.searchBtn}>
-          <Search size={16} />
-          <span>Search transactions...</span>
-          <span className={styles.searchShortcut}>⌘K</span>
-        </button>
-
         <div className={styles.profileSection}>
           <span className={styles.greeting}>
             Welcome,{" "}
@@ -34,9 +28,11 @@ export default function AppHeader() {
               {session?.user?.name || session?.user?.email || "User"}
             </strong>
           </span>
-          <div className={styles.avatar}>
-            {getInitials(session?.user?.name || session?.user?.email)}
-          </div>
+          <Link href="/profile" className={styles.avatarLink} title="View Profile">
+            <div className={styles.avatar}>
+              {getInitials(session?.user?.name || session?.user?.email)}
+            </div>
+          </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className={styles.logoutBtn}
