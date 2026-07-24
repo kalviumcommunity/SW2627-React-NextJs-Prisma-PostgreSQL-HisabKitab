@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronDown, Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function DateRangePicker() {
+function DateRangePickerInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentRange = searchParams.get("range") || "All Time";
@@ -103,5 +103,15 @@ export default function DateRangePicker() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function DateRangePicker() {
+  return (
+    <Suspense fallback={
+      <div className="h-12 w-[210px] bg-gray-100 animate-pulse rounded-[12px] border border-gray-200"></div>
+    }>
+      <DateRangePickerInner />
+    </Suspense>
   );
 }
