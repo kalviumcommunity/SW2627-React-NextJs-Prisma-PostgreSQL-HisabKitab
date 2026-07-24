@@ -141,7 +141,7 @@ export async function createTransaction(data) {
     return { success: true };
   } catch (error) {
     console.error("Failed to create transaction:", error);
-    try { require('fs').appendFileSync('error_log.txt', String(error.message || error) + '\n'); } catch(e){}
+    try { require('fs').appendFileSync('error_log.txt', String(error.message || error) + '\n'); } catch (err) { /* ignore */ }
     return { success: false, error: error.message || String(error) };
   }
 }
