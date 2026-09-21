@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hisab-kitab/database": "file:../../packages/database",
     "@hisab-kitab/shared": "file:../../packages/shared",
+    "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/postcss": "^4.3.2",
     "bcryptjs": "^2.4.3",
     "framer-motion": "^12.42.2",

@@ -10,7 +10,8 @@ import {
   Settings,
   ChevronLeft,
   PieChart,
-  BookOpen
+  BookOpen,
+  FileText
 } from "lucide-react";
 import styles from "./AppSidebar.module.css";
 import { useSession } from "next-auth/react";
@@ -21,6 +22,7 @@ const navItems = [
   { name: "Workers", href: "/workers", icon: Users },
   { name: "Analytics", href: "/analytics", icon: PieChart },
   { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Paper Import", href: "/paper-import", icon: FileText },
 ];
 
 export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
