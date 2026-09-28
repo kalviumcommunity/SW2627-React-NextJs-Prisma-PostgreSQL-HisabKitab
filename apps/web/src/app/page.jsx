@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
-// Helper Compound Component to demonstrate React Component Composition
+// Compound Component Pattern for React Component Composition
 function CompositionDemoCard({ children }) {
   return (
     <div style={{ border: "1px solid #4f46e5", borderRadius: "8px", overflow: "hidden", marginTop: "1rem", backgroundColor: "#0f172a" }}>
@@ -12,17 +12,24 @@ function CompositionDemoCard({ children }) {
   );
 }
 
-CompositionDemoCard.Header = function CardHeader({ title }) {
+function CardHeader({ title }) {
   return <div style={{ background: "#1e1b4b", padding: "0.75rem 1rem", borderBottom: "1px solid #3730a3", color: "#818cf8", fontWeight: "bold" }}>{title}</div>;
-};
+}
+CardHeader.displayName = "CompositionDemoCardHeader";
 
-CompositionDemoCard.Body = function CardBody({ children }) {
+function CardBody({ children }) {
   return <div style={{ padding: "1rem", color: "#e2e8f0" }}>{children}</div>;
-};
+}
+CardBody.displayName = "CompositionDemoCardBody";
 
-CompositionDemoCard.Footer = function CardFooter({ text }) {
+function CardFooter({ text }) {
   return <div style={{ background: "#020617", padding: "0.5rem 1rem", fontSize: "0.8rem", color: "#94a3b8", borderTop: "1px solid #1e293b" }}>{text}</div>;
-};
+}
+CardFooter.displayName = "CompositionDemoCardFooter";
+
+CompositionDemoCard.Header = CardHeader;
+CompositionDemoCard.Body = CardBody;
+CompositionDemoCard.Footer = CardFooter;
 
 export default function VivaPage() {
   const [logs, setLogs] = useState([]);
@@ -80,7 +87,7 @@ export default function VivaPage() {
     try {
       addLog("2. Awaiting transaction data sequentially...");
       const tx1 = await fakeFetchTransaction(101, 600);
-      addLog(`✓ Received Tx #101: ₹${tx1.amount} (${tx1.contact})`);
+      addLog(`✓ Received Tx #${tx1.id}: ₹${tx1.amount} (${tx1.contact})`);
 
       addLog("3. Executing parallel async fetches with Promise.all...");
       const [tx2, tx3] = await Promise.all([
@@ -114,9 +121,30 @@ export default function VivaPage() {
   // 5. React Component Composition (Frontend - 0.2 pts)
   const demonstrateCompositionPattern = () => {
     addLog("--- Demonstrating React Component Composition ---");
-    addLog("Component Composition avoids Prop Drilling by wrapping sub-components using `children` props and Compound Component patterns.");
+    addLog("Component Composition avoids Prop Drilling by wrapping sub-components using children props and Compound Component patterns.");
     addLog("Example: <CompositionDemoCard><CompositionDemoCard.Header /><CompositionDemoCard.Body /></CompositionDemoCard>");
     setShowCompositionWidget(true);
+  };
+
+  const btnStyle = {
+    padding: "0.75rem 1rem",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "0.88rem",
+    textAlign: "center",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    transition: "transform 0.1s, opacity 0.2s"
+  };
+
+  const subTextStyle = {
+    fontSize: "0.75rem",
+    fontWeight: "normal",
+    opacity: 0.9,
+    display: "inline-block",
+    marginTop: "2px"
   };
 
   return (
@@ -174,7 +202,7 @@ export default function VivaPage() {
 
       {/* Log Terminal Display */}
       <div style={{ backgroundColor: "#090d16", color: "#38bdf8", padding: "1.25rem", borderRadius: "12px", minHeight: "360px", fontFamily: "monospace", border: "1px solid #1e293b", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.3)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #1e293b", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", justify: "space-between", alignItems: "center", borderBottom: "1px solid #1e293b", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
           <span style={{ color: "#f8fafc", fontWeight: "bold", fontSize: "0.9rem" }}>💻 Interactive Terminal Output Log:</span>
           <span style={{ color: "#64748b", fontSize: "0.75rem" }}>{logs.length} entries</span>
         </div>
@@ -199,25 +227,3 @@ export default function VivaPage() {
     </div>
   );
 }
-
-const btnStyle = {
-  padding: "0.75rem 1rem",
-  color: "white",
-  border: "none",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "600",
-  fontSize: "0.88rem",
-  textAlign: "center",
-  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  transition: "transform 0.1s, opacity 0.2s"
-};
-
-const subTextStyle = {
-  fontSize: "0.75rem",
-  fontWeight: "normal",
-  opacity: 0.9,
-  display: "inline-block",
-  marginTop: "2px"
-};
-
